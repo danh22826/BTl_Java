@@ -50,13 +50,15 @@ public class Phim {
     public String getMaPhim() {
         return maPhim;
     }
-    public String getTenPhim() {
-        return tenPhim;
-    }
     public void setTenPhim(String tenPhim) {
 
         this.tenPhim = tenPhim;
     }
+
+    public String getTenPhim() {
+        return tenPhim;
+    }
+
     public String getMoTa() {
 
         return moTa;

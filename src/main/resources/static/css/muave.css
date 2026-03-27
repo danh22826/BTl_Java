@@ -1,0 +1,481 @@
+/* ===== RESET & BIẾN ===== */
+:root {
+    --do:       #e50914;
+    --den:      #1a1a1a;
+    --xam-dam:  #444;
+    --xam:      #888;
+    --xam-nhat: #f5f0e8;
+    --trang:    #ffffff;
+    --border:   #ddd;
+    --nen:      #f0ebe0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--nen);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: var(--den);
+}
+
+/* ===== WRAPPER ===== */
+.booking-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ===== CHỌN NGÀY ===== */
+.date-selector {
+    background: var(--den);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 6px;
+}
+
+.date-selector__arrow {
+    background: #333;
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.date-selector__arrow:hover { background: #555; }
+
+.date-selector__list {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+    align-items: center;
+}
+
+/* Từng ngày */
+.ngay-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #aaa;
+    font-size: 0.75rem;
+    gap: 2px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.ngay-btn:hover { background: #333; color: #fff; }
+
+.ngay-btn--active {
+    background: var(--do);
+    color: #fff;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    padding: 0;
+    justify-content: center;
+}
+
+.ngay-btn__thu { font-size: 0.7rem; }
+.ngay-btn__so  { font-size: 1.15rem; font-weight: 700; line-height: 1; }
+
+/* ===== KHỐI RẠP + PHIM ===== */
+.booking-grid {
+    display: flex;
+    background: var(--trang);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    min-height: 460px;
+}
+
+/* Header mỗi block */
+.block__header {
+    padding: 13px 16px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.block__toolbar {
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    min-height: 42px;
+    align-items: center;
+}
+
+/* ===== BLOCK RẠP ===== */
+.block-rap {
+    width: 380px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.block-rap .block__content {
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 2 cột trong block rạp */
+.split-columns {
+    display: flex;
+    height: 100%;
+}
+
+/* Cột thành phố */
+.column-city {
+    width: 155px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+.city-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 13px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--xam-dam);
+    text-align: left;
+    line-height: 1.3;
+    transition: background 0.15s;
+}
+
+.city-btn:hover { background: var(--xam-nhat); }
+
+.city-btn--active {
+    background: var(--den);
+    color: #fff;
+    font-weight: 700;
+}
+
+.city-btn--empty {
+    color: var(--xam);
+    cursor: default;
+    font-size: 0.75rem;
+}
+
+.city-btn--empty:hover { background: none; }
+
+/* Cột rạp */
+.column-cinema {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    background: var(--xam-nhat);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cinema-btn {
+    width: 100%;
+    padding: 8px 11px;
+    background: var(--trang);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.cinema-btn:hover { border-color: var(--den); }
+
+.cinema-btn--active {
+    background: var(--den);
+    color: #fff;
+    border-color: var(--den);
+}
+
+.cinema-btn__ten { font-weight: 600; }
+
+.cinema-btn__dia-chi {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--xam);
+    margin-top: 2px;
+}
+
+.cinema-btn--active .cinema-btn__dia-chi { color: #bbb; }
+
+/* ===== BLOCK PHIM ===== */
+.block-phim {
+    flex: 1;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.block-phim .block__content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Toolbar nút tab */
+.toolbar-btn {
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.toolbar-btn--active {
+    background: var(--den);
+    color: #fff;
+    border-color: var(--den);
+}
+
+/* Từng phim */
+.phim-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.phim-btn:hover { background: var(--xam-nhat); }
+.phim-btn--active { background: #fff5f5; }
+
+.phim-btn__badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.phim-btn__ten {
+    font-size: 0.87rem;
+    font-weight: 600;
+    flex: 1;
+}
+
+.phim-btn__check {
+    color: var(--den);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* ===== THANH TÓM TẮT ===== */
+.summary-bar {
+    background: #3d3427;
+    color: #fff;
+    padding: 11px 24px;
+    border-radius: 8px;
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.summary-label { color: #aaa; margin-right: 6px; }
+
+.tag-style {
+    background: rgba(255,255,255,0.15);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tag-xoa {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.78rem;
+    opacity: 0.7;
+    padding: 0;
+    line-height: 1;
+}
+
+.tag-xoa:hover { opacity: 1; }
+
+/* ===== GIỜ CHIẾU ===== */
+.showtimes-section {
+    background: var(--trang);
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.showtimes__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.showtimes__header h2 {
+    font-size: 1.2rem;
+    font-weight: 100;
+}
+
+.showtimes__header p {
+    font-size: 0.75rem;
+    color: var(--xam);
+    margin-top: 3px;
+}
+
+/* Khối suất chiếu của 1 phim */
+.showtime-block {
+    background: var(--xam-nhat);
+    border-radius: 6px;
+    padding: 13px 15px;
+    margin-bottom: 14px;
+}
+
+.showtime-block__tieu-de {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.showtime-block__rap {
+    font-weight: 700;
+    font-size: 0.92rem;
+    margin-bottom: 3px;
+}
+
+.showtime-block__loai {
+    font-size: 0.75rem;
+    color: var(--xam);
+    margin-bottom: 10px;
+}
+
+/* Lưới suất */
+.showtime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+    gap: 8px;
+}
+
+.showtime-card {
+    background: var(--trang);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.showtime-card:hover { border-color: var(--den); background: var(--xam-nhat); }
+.showtime-card--active { border-color: var(--do); background: #fff5f5; }
+.showtime-card--het-gio { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+.showtime-card__phong { font-size: 0.68rem; color: var(--xam); margin-bottom: 3px; }
+.showtime-card__gio   { font-size: 1.15rem; font-weight: 700; }
+.showtime-card__ghe   { font-size: 0.68rem; color: var(--do); margin-top: 3px; }
+.showtime-card__ghe--day { color: var(--xam); }
+
+/* ===== TRẠNG THÁI LOADING / EMPTY ===== */
+.loading-text {
+    padding: 20px;
+    text-align: center;
+    color: var(--xam);
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--xam);
+    font-size: 0.85rem;
+}
+
+.empty-state--small { padding: 20px; }
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #eee;
+    border-top-color: var(--do);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 8px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .booking-grid  { flex-direction: column; }
+    .block-rap     { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    .split-columns { height: 260px; }
+    .summary-bar   { gap: 12px; }
+}
+
+.rap-subbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fafafa;
+    flex-wrap: wrap;
+}
+
+.rap-subbar__label {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.rap-subbar__value {
+    display: inline-block;
+    padding: 6px 10px;
+    background: #eee4d4;
+    border: 1px solid #cdbfa8;
+    border-radius: 2px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
