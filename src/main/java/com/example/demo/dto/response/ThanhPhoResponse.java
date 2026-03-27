@@ -1,15 +1,11 @@
-package com.example.demo.DTO;
+package com.example.demo.dto.response;
 
-public class ThanhPhoDTO {
+public class ThanhPhoResponse {
 
     private String maThanhPho;
     private String tenThanhPho;
-    private Long soRap;
 
-    public ThanhPhoDTO(String maThanhPho, String tenThanhPho, Long soRap) {
-        this.maThanhPho = maThanhPho;
-        this.tenThanhPho = tenThanhPho;
-        this.soRap = soRap;
+    public ThanhPhoResponse() {
     }
 
     public String getMaThanhPho() {
@@ -26,13 +22,5 @@ public class ThanhPhoDTO {
 
     public void setTenThanhPho(String tenThanhPho) {
         this.tenThanhPho = tenThanhPho;
-    }
-
-    public Long getSoRap() {
-        return soRap;
-    }
-
-    public void setSoRap(Long soRap) {
-        this.soRap = soRap;
     }
 }

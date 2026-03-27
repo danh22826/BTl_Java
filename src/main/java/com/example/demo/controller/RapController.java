@@ -20,17 +20,7 @@ public class RapController {
         this.rapService = rapService;
     }
 
-    @GetMapping("/thanh-pho")
-    public List<Map<String, Object>> getThanhPho() {
-        List<ThanhPho> dsThanhPho = rapService.getAllThanhPho();
 
-        return dsThanhPho.stream().map(tp -> {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("maThanhPho", tp.getMaThanhPho());
-            map.put("tenThanhPho", tp.getTenThanhPho());
-            return map;
-        }).toList();
-    }
 
     @GetMapping("/rap")
     public List<Map<String, Object>> getRapTheoThanhPho(@RequestParam String maThanhPho) {

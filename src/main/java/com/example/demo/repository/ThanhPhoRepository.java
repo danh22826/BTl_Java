@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ThanhPhoRepository extends JpaRepository<ThanhPho, String> {
+   boolean existsByTenThanhPho(String tenThanhPho);
 }

@@ -21,8 +21,7 @@ public class ThanhPho {
     @JsonIgnore
     private List<Rap> dsRap = new ArrayList<>();
 
-    public ThanhPho() {
-    }
+    public ThanhPho() {}
 
     public ThanhPho(String maThanhPho, String tenThanhPho) {
         this.maThanhPho = maThanhPho;
