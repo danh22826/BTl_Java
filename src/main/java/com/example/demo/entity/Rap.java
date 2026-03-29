@@ -1,10 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,33 +9,21 @@ import java.util.List;
 public class Rap {
 
     @Id
-    @Column(name = "MaRap", nullable = false, length = 20)
+    @Column(name = "MaRap")
     private String maRap;
 
-    @Column(name = "TenRap", nullable = false, length = 100)
+    @Column(name = "TenRap")
     private String tenRap;
 
-    @Column(name = "DiaChi", length = 255)
+    @Column(name = "DiaChi")
     private String diaChi;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "MaThanhPho", nullable = false)
-    @JsonIgnoreProperties("dsRap")
-    private ThanhPho thanhPho;
+    @Column(name = "MaThanhPho")
+    private String maThanhPho;
 
-    @OneToMany(mappedBy = "rap", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "rap")
     @JsonIgnore
-    private List<PhongChieu> phongChieus = new ArrayList<>();
-
-    public Rap() {
-    }
-
-    public Rap(String maRap, String tenRap, String diaChi, ThanhPho thanhPho) {
-        this.maRap = maRap;
-        this.tenRap = tenRap;
-        this.diaChi = diaChi;
-        this.thanhPho = thanhPho;
-    }
+    private List<PhongChieu> phongChieus;
 
     public String getMaRap() {
         return maRap;
@@ -64,12 +49,12 @@ public class Rap {
         this.diaChi = diaChi;
     }
 
-    public ThanhPho getThanhPho() {
-        return thanhPho;
+    public String getMaThanhPho() {
+        return maThanhPho;
     }
 
-    public void setThanhPho(ThanhPho thanhPho) {
-        this.thanhPho = thanhPho;
+    public void setMaThanhPho(String maThanhPho) {
+        this.maThanhPho = maThanhPho;
     }
 
     public List<PhongChieu> getPhongChieus() {
