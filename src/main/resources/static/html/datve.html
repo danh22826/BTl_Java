@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt vé</title>
+    <link rel="stylesheet" href="../css/datve.css">
+</head>
+<body>
+
+<div class="booking-page">
+
+    <!-- Thanh chọn ngày -->
+    <section class="booking-date-bar">
+        <button class="date-nav" id="prev-date">&lt;</button>
+
+        <div class="date-list" id="date-list">
+            <!-- JS render ngày ở đây -->
+        </div>
+
+        <button class="date-nav" id="next-date">&gt;</button>
+    </section>
+
+    <!-- Khung chọn rạp + phim -->
+    <section class="booking-main-box">
+        <div class="booking-left">
+            <div class="box-header">Rạp</div>
+
+            <div class="booking-content">
+                <div class="city-list" id="city-list">
+                    <!-- JS render thành phố / khu vực -->
+                </div>
+
+                <div class="rap-list" id="rap-list">
+                    <!-- JS render rạp theo thành phố -->
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-right">
+            <div class="box-header">Phim</div>
+
+            <div class="movie-list" id="movie-list">
+                <!-- JS render phim -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Khung trạng thái đang chọn -->
+    <section class="booking-selected-info">
+        <div>
+            <strong>Ngày</strong>
+            <span id="selected-date">Chưa chọn</span>
+        </div>
+
+        <div>
+            <strong>Rạp</strong>
+            <span id="selected-rap">Vui lòng chọn rạp</span>
+        </div>
+
+        <div>
+            <strong>Phim</strong>
+            <span id="selected-movie">Vui lòng chọn phim</span>
+        </div>
+    </section>
+
+    <!-- Khung giờ chiếu -->
+    <section class="booking-showtime-box">
+        <div class="showtime-header">
+            <h2>Giờ chiếu</h2>
+            <select id="showtime-filter">
+                <option value="all">Tất cả</option>
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+            </select>
+        </div>
+
+        <div class="showtime-list" id="showtime-list">
+            <!-- JS render suất chiếu -->
+        </div>
+    </section>
+
+</div>
+
+<script src="../js/datve.js"></script>
+</body>
+</html>

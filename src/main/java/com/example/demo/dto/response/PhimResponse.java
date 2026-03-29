@@ -1,61 +1,26 @@
-package com.example.demo.entity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+package com.example.demo.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
-@Table(name = "Phim")
-public class Phim {
+public class PhimResponse {
 
-    @Id
-    @Column(name = "MaPhim", nullable = false, length = 20)
     private String maPhim;
-
-    @Column(name = "TenPhim", nullable = false, length = 255)
     private String tenPhim;
-
-    @Column(name = "MoTa")
     private String moTa;
-
-    @Column(name = "Poster", length = 500)
     private String poster;
-
-    @Column(name = "ThoiLuong", nullable = false)
     private Integer thoiLuong;
-
-    @Column(name = "NgayKhoiChieu")
     private LocalDate ngayKhoiChieu;
-
-    @Column(name = "DoTuoiPhuHop", length = 20)
     private String doTuoiPhuHop;
-
-    @Column(name = "NgonNgu", length = 50)
     private String ngonNgu;
 
-    // ===== MANY TO MANY THE LOAI =====
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "PhimTheLoai",
-            joinColumns = @JoinColumn(name = "MaPhim"),
-            inverseJoinColumns = @JoinColumn(name = "MaTheLoai")
-    )
-    @JsonIgnoreProperties("phims")
-    private List<TheLoai> theLoais;
+    private List<String> theLoais;
 
-    // ===== ONE TO MANY SUAT CHIEU =====
-    @OneToMany(mappedBy = "phim", fetch = FetchType.LAZY)
-    @JsonIgnore // tránh loop JSON
-    private List<SuatChieu> suatChieus;
-
-    public Phim() {
+    // 1. Constructor mặc định (Bắt buộc cho quá trình parse JSON)
+    public PhimResponse() {
     }
 
-    // ===== Getter Setter =====
-
+    // 2. Getters và Setters
     public String getMaPhim() {
         return maPhim;
     }
@@ -120,19 +85,11 @@ public class Phim {
         this.ngonNgu = ngonNgu;
     }
 
-    public List<TheLoai> getTheLoais() {
+    public List<String> getTheLoais() {
         return theLoais;
     }
 
-    public void setTheLoais(List<TheLoai> theLoais) {
+    public void setTheLoais(List<String> theLoais) {
         this.theLoais = theLoais;
-    }
-
-    public List<SuatChieu> getSuatChieus() {
-        return suatChieus;
-    }
-
-    public void setSuatChieus(List<SuatChieu> suatChieus) {
-        this.suatChieus = suatChieus;
     }
 }
