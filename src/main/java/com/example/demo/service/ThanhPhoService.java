@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.request.CreateThanhPhoRequest;
-import com.example.demo.dto.request.UpdateThanhPhoRequest;
+import com.example.demo.dto.request.ThanhPho.CreateThanhPhoRequest;
+import com.example.demo.dto.request.ThanhPho.UpdateThanhPhoRequest;
 import com.example.demo.dto.response.ThanhPhoResponse;
 import com.example.demo.entity.ThanhPho;
 import com.example.demo.repository.ThanhPhoRepository;

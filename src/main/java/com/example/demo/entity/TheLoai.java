@@ -1,17 +1,24 @@
 package com.example.demo.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.List;
 
 @Entity
 @Table(name = "TheLoai")
 public class TheLoai {
 
     @Id
-    @Column(name = "MaTheLoai")
+    @Column(name = "MaTheLoai", nullable = false, length = 20)
     private String maTheLoai;
 
-    @Column(name = "TenTheLoai")
+    @Column(name = "TenTheLoai", nullable = false, length = 100)
     private String tenTheLoai;
+
+    @ManyToMany(mappedBy = "theLoais")
+    @JsonIgnore
+    private List<Phim> phims;
 
     public TheLoai() {
     }
@@ -35,5 +42,13 @@ public class TheLoai {
 
     public void setTenTheLoai(String tenTheLoai) {
         this.tenTheLoai = tenTheLoai;
+    }
+
+    public List<Phim> getPhims() {
+        return phims;
+    }
+
+    public void setPhims(List<Phim> phims) {
+        this.phims = phims;
     }
 }

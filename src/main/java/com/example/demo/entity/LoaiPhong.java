@@ -10,10 +10,10 @@ import java.util.List;
 public class LoaiPhong {
 
     @Id
-    @Column(name = "MaLoaiPhong", length = 20, nullable = false)
+    @Column(name = "MaLoaiPhong", length = 20)
     private String maLoaiPhong;
 
-    @Column(name = "TenLoaiPhong", length = 50, nullable = false)
+    @Column(name = "TenLoaiPhong", nullable = false, length = 100)
     private String tenLoaiPhong;
 
     @OneToMany(mappedBy = "loaiPhong")
@@ -28,6 +28,7 @@ public class LoaiPhong {
         this.tenLoaiPhong = tenLoaiPhong;
     }
 
+    // 3. Getters và Setters
     public String getMaLoaiPhong() {
         return maLoaiPhong;
     }

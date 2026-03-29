@@ -11,41 +11,72 @@ import java.time.LocalTime;
 public class SuatChieu {
 
     @Id
-    @Column(name = "MaSuatChieu", length = 20, nullable = false)
-    private String maSuatChieu;
+    @Column(name = "MaSuat", nullable = false, length = 20)
+    private String maSuat;
 
+    @Column(name = "NgayChieu", nullable = false)
+    private LocalDate ngayChieu;
+
+    @Column(name = "GioChieu", nullable = false)
+    private LocalTime gioChieu;
+
+    @Column(name = "Gia", nullable = false)
+    private Double gia;
+
+    // ===== FK -> Phim =====
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MaPhong")
+    @JoinColumn(name = "MaPhim", nullable = false)
     @JsonIgnoreProperties({"suatChieus"})
-    private PhongChieu phongChieu;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MaPhim")
     private Phim phim;
 
-    @Column(name = "ThoiGianChieu")
-    private LocalTime thoiGianChieu;
-
-    @Column(name = "NgayChieu")
-    private LocalDate ngayChieu;
+    // ===== FK -> PhongChieu =====
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaPhong", nullable = false)
+    @JsonIgnoreProperties({"ghes", "suatChieus"})
+    private PhongChieu phongChieu;
 
     public SuatChieu() {
     }
 
-    public String getMaSuatChieu() {
-        return maSuatChieu;
-    }
-
-    public void setMaSuatChieu(String maSuatChieu) {
-        this.maSuatChieu = maSuatChieu;
-    }
-
-    public PhongChieu getPhongChieu() {
-        return phongChieu;
-    }
-
-    public void setPhongChieu(PhongChieu phongChieu) {
+    public SuatChieu(String maSuat, LocalDate ngayChieu, LocalTime gioChieu, Double gia, Phim phim, PhongChieu phongChieu) {
+        this.maSuat = maSuat;
+        this.ngayChieu = ngayChieu;
+        this.gioChieu = gioChieu;
+        this.gia = gia;
+        this.phim = phim;
         this.phongChieu = phongChieu;
+    }
+
+    public String getMaSuat() {
+        return maSuat;
+    }
+
+    public void setMaSuat(String maSuat) {
+        this.maSuat = maSuat;
+    }
+
+    public LocalDate getNgayChieu() {
+        return ngayChieu;
+    }
+
+    public void setNgayChieu(LocalDate ngayChieu) {
+        this.ngayChieu = ngayChieu;
+    }
+
+    public LocalTime getGioChieu() {
+        return gioChieu;
+    }
+
+    public void setGioChieu(LocalTime gioChieu) {
+        this.gioChieu = gioChieu;
+    }
+
+    public Double getGia() {
+        return gia;
+    }
+
+    public void setGia(Double gia) {
+        this.gia = gia;
     }
 
     public Phim getPhim() {
@@ -56,20 +87,11 @@ public class SuatChieu {
         this.phim = phim;
     }
 
-    public LocalTime getThoiGianChieu() {
-        return thoiGianChieu;
+    public PhongChieu getPhongChieu() {
+        return phongChieu;
     }
 
-    public void setThoiGianChieu(LocalTime thoiGianChieu) {
-        this.thoiGianChieu = thoiGianChieu;
-    }
-
-    public LocalDate getNgayChieu() {
-        return ngayChieu;
-    }
-
-    public void setNgayChieu(LocalDate ngayChieu) {
-        this.ngayChieu = ngayChieu;
+    public void setPhongChieu(PhongChieu phongChieu) {
+        this.phongChieu = phongChieu;
     }
 }
-

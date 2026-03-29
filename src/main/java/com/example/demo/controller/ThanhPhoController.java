@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.CreateThanhPhoRequest;
-import com.example.demo.dto.request.UpdateThanhPhoRequest;
+import com.example.demo.dto.request.ThanhPho.CreateThanhPhoRequest;
+import com.example.demo.dto.request.ThanhPho.UpdateThanhPhoRequest;
 import com.example.demo.dto.response.ThanhPhoResponse;
 import com.example.demo.service.ThanhPhoService;
 import jakarta.validation.Valid;
