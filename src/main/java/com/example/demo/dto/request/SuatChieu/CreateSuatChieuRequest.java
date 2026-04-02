@@ -4,7 +4,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
+import java.math.BigDecimal;
+import jakarta.validation.constraints.DecimalMin;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -27,8 +28,8 @@ public class CreateSuatChieuRequest {
     private LocalTime gioChieu;
 
     @NotNull(message = "Giá vé không được để trống")
-    @Min(value = 0, message = "Giá vé phải từ 0 đồng trở lên")
-    private Double gia;
+    @DecimalMin(value = "0.0", inclusive = true, message = "Giá vé phải từ 0 đồng trở lên")
+    private BigDecimal gia;
 
     public CreateSuatChieuRequest() {
     }
@@ -48,6 +49,6 @@ public class CreateSuatChieuRequest {
     public LocalTime getGioChieu() { return gioChieu; }
     public void setGioChieu(LocalTime gioChieu) { this.gioChieu = gioChieu; }
 
-    public Double getGia() { return gia; }
-    public void setGia(Double gia) { this.gia = gia; }
+    public BigDecimal getGia() { return gia; }
+    public void setGia(BigDecimal gia) { this.gia = gia; }
 }

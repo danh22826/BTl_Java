@@ -25,4 +25,7 @@ public class CreateThanhPhoRequest {
     public String getMaThanhPho() {
         return maThanhPho;
     }
+    public void setMaThanhPho(String maThanhPho) {
+        this.maThanhPho = maThanhPho;
+    }
 }

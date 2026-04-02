@@ -1,8 +1,8 @@
 package com.example.demo.dto.request.PhongChieu;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public class CreatePhongChieuRequest {
@@ -16,7 +16,7 @@ public class CreatePhongChieuRequest {
     private String tenPhong;
 
     @NotNull(message = "Sức chứa không được để trống")
-    @Min(value = 1, message = "Sức chứa phải từ 1 ghế trở lên")
+    @Positive(message = "Sức chứa phải lớn hơn 0")
     private Integer sucChua;
 
     @NotBlank(message = "Mã rạp không được để trống")

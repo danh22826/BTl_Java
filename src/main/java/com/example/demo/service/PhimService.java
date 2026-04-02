@@ -4,14 +4,15 @@ import com.example.demo.dto.request.Phim.*;
 import com.example.demo.dto.response.PhimResponse;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
 @Service
+@Transactional
 public class PhimService {
-
     private final PhimRepository phimRepo;
     private final TheLoaiRepository theLoaiRepo;
 
@@ -29,7 +30,7 @@ public class PhimService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phim"));
         return toResponse(p);
     }
-
+    @Transactional
     public PhimResponse create(CreatePhimRequest req) {
 
         if (phimRepo.existsById(req.getMaPhim())) {
@@ -55,7 +56,7 @@ public class PhimService {
 
         return toResponse(phimRepo.save(p));
     }
-
+    @Transactional
     public PhimResponse update(String id, UpdatePhimRequest req) {
 
         Phim p = phimRepo.findById(id)
@@ -76,7 +77,7 @@ public class PhimService {
 
         return toResponse(phimRepo.save(p));
     }
-
+@Transactional
     public void delete(String id) {
         phimRepo.deleteById(id);
     }

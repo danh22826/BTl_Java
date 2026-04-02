@@ -1,5 +1,6 @@
 package com.example.demo.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -8,7 +9,7 @@ public class SuatChieuResponse {
     private String maSuat;
     private LocalDate ngayChieu;
     private LocalTime gioChieu;
-    private Double gia;
+    private BigDecimal gia;
 
     // Trải phẳng thông tin Phim, Phòng, Rạp
     private String maPhim;
@@ -32,8 +33,8 @@ public class SuatChieuResponse {
     public LocalTime getGioChieu() { return gioChieu; }
     public void setGioChieu(LocalTime gioChieu) { this.gioChieu = gioChieu; }
 
-    public Double getGia() { return gia; }
-    public void setGia(Double gia) { this.gia = gia; }
+    public BigDecimal getGia() { return gia; }
+    public void setGia(BigDecimal gia) { this.gia = gia; }
 
     public String getMaPhim() { return maPhim; }
     public void setMaPhim(String maPhim) { this.maPhim = maPhim; }

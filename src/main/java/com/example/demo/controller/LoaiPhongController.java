@@ -36,8 +36,7 @@ public class LoaiPhongController {
     public ResponseEntity<LoaiPhongResponse> createLoaiPhong(
             @Valid @RequestBody CreateLoaiPhongRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(loaiPhongService.createLoaiPhong(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(loaiPhongService.createLoaiPhong(request));
     }
 
     @PutMapping("/{maLoaiPhong}")

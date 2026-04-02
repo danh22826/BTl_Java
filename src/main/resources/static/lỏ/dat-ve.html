@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTC Cinema – Đặt Vé</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .booking-wrapper { display:grid; grid-template-columns:1fr 360px; gap:32px; align-items:start; }
+    .seat-section { background:var(--white); border-radius:12px; padding:24px; box-shadow:var(--shadow-sm); }
+    .screen-indicator { text-align:center; margin-bottom:32px; }
+    .screen-line { width:80%; max-width:500px; height:3px; background:linear-gradient(90deg,transparent,var(--accent-gold),transparent); margin:0 auto 8px; border-radius:2px; }
+    .screen-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; }
+    .seat-map { display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:24px; }
+    .seat-row { display:flex; align-items:center; gap:4px; }
+    .seat-row-label { width:28px; font-size:.75rem; font-weight:600; color:var(--text-muted); text-align:center; }
+    .seat { width:34px; height:34px; border-radius:6px; border:2px solid var(--border-light); background:var(--bg-cream); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:600; color:var(--text-dark); transition:all .15s; }
+    .seat:hover:not(.booked):not(.selected) { border-color:var(--accent-gold); background:var(--accent-gold-light); }
+    .seat.selected { background:var(--accent-gold); border-color:var(--accent-gold); color:var(--white); }
+    .seat.booked { background:#ccc; border-color:#bbb; color:#999; cursor:not-allowed; }
+    .seat.vip { border-color:#9b59b6; }
+    .seat.vip.selected { background:#9b59b6; border-color:#9b59b6; }
+    .seat.sweetbox { border-color:#e74c3c; }
+    .seat.sweetbox.selected { background:#e74c3c; border-color:#e74c3c; }
+    .seat-legend { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; padding:16px 0; border-top:1px solid var(--border-light); }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:.8rem; color:var(--text-muted); }
+    .legend-box { width:22px; height:22px; border-radius:4px; border:2px solid var(--border-light); }
+    .legend-box.sel { background:var(--accent-gold); border-color:var(--accent-gold); }
+    .legend-box.bk { background:#ccc; border-color:#bbb; }
+    .legend-box.vip { border-color:#9b59b6; }
+    .legend-box.sw { border-color:#e74c3c; }
+    .booking-summary { background:var(--white); border-radius:12px; padding:24px; box-shadow:var(--shadow-sm); position:sticky; top:100px; }
+    .summary-movie { display:flex; gap:16px; margin-bottom:20px; }
+    .summary-poster { width:100px; border-radius:8px; object-fit:cover; }
+    .summary-info h3 { font-size:1rem; margin-bottom:8px; }
+    .summary-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-light); font-size:.9rem; }
+    .summary-row:last-child { border-bottom:none; }
+    .total-row { font-size:1.1rem; font-weight:700; color:var(--accent-red); border-top:2px solid var(--border-light); padding-top:14px; margin-top:8px; }
+    .btn-book { display:block; width:100%; padding:14px; background:var(--accent-red); color:var(--white); border:none; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer; margin-top:16px; transition:background .2s; }
+    .btn-book:hover { background:#c41530; }
+    .btn-book:disabled { background:#ccc; cursor:not-allowed; }
+    @media(max-width:992px) { .booking-wrapper { grid-template-columns:1fr; } .booking-summary { position:static; } }
+    @media(max-width:480px) { .seat { width:26px; height:26px; font-size:.55rem; } .seat-row-label { width:22px; font-size:.65rem; } }
+  </style>
+</head>
+<body>
+
+<div id="site-header"></div>
+<div class="gold-bar"></div>
+
+<section style="padding:32px 0;">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav style="font-size:.85rem;color:var(--text-muted);margin-bottom:24px;">
+      <a href="index.html" style="color:var(--accent-gold)">Trang chủ</a>
+      <span> / </span>
+      <a href="mua-ve.html" style="color:var(--accent-gold)">Mua vé</a>
+      <span> / </span>
+      <span>Chọn ghế</span>
+    </nav>
+
+    <div id="bookingContent">
+      <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<div id="quick-actions"></div>
+<div id="site-footer"></div>
+
+<script src="js/shared.js"></script>
+<script>
+let suatChieu = null, allSeats = [], selectedSeats = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  initPage('mua-ve');
+
+  const params = new URLSearchParams(location.search);
+  const maSuat = params.get('suat');
+  if (!maSuat) {
+    document.getElementById('bookingContent').innerHTML = '<div class="empty-state"><i class="fas fa-ticket-alt"></i><h3>Không tìm thấy suất chiếu</h3><a href="mua-ve.html" class="btn-primary" style="text-decoration:none;display:inline-block;margin-top:16px;">Xem lịch chiếu</a></div>';
+    return;
+  }
+
+  try {
+    suatChieu = await apiFetch('/suat-chieu/' + encodeURIComponent(maSuat));
+    const maPhong = suatChieu.phongChieu?.maPhong || suatChieu.maPhong;
+    allSeats = await apiFetch('/ghe?maPhong=' + encodeURIComponent(maPhong));
+    renderBookingPage();
+  } catch(e) {
+    document.getElementById('bookingContent').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Lỗi tải dữ liệu suất chiếu</h3></div>';
+  }
+});
+
+function renderBookingPage() {
+  const phim = suatChieu.phim || {};
+  const phong = suatChieu.phongChieu || {};
+  const rap = phong.rap || suatChieu.rap || {};
+
+  // Group seats by row
+  const rows = {};
+  allSeats.forEach(s => {
+    const row = s.hangGhe || s.tenGhe?.charAt(0) || '?';
+    if (!rows[row]) rows[row] = [];
+    rows[row].push(s);
+  });
+  // Sort seats within each row
+  Object.values(rows).forEach(arr => arr.sort((a, b) => {
+    const numA = parseInt(a.tenGhe?.replace(/[^0-9]/g, '')) || 0;
+    const numB = parseInt(b.tenGhe?.replace(/[^0-9]/g, '')) || 0;
+    return numA - numB;
+  }));
+  const sortedRows = Object.keys(rows).sort();
+
+  const seatMapHTML = sortedRows.map(row => {
+    const seats = rows[row];
+    return `<div class="seat-row">
+      <span class="seat-row-label">${escapeHtml(row)}</span>
+      ${seats.map(s => {
+        const isBooked = s.trangThai === 'DA_DAT' || s.trangThai === 'DA_BAN';
+        const loai = (s.loaiGhe?.tenLoaiGhe || '').toLowerCase();
+        let cls = 'seat';
+        if (isBooked) cls += ' booked';
+        if (loai.includes('vip')) cls += ' vip';
+        if (loai.includes('sweetbox') || loai.includes('đôi')) cls += ' sweetbox';
+        return `<button class="${cls}" data-ma="${escapeHtml(s.maGhe)}" data-gia="${s.loaiGhe?.phuThu || 0}" data-ten="${escapeHtml(s.tenGhe)}" ${isBooked ? 'disabled' : `onclick="toggleSeat(this)"`}>${escapeHtml(s.tenGhe?.replace(row, '') || '')}</button>`;
+      }).join('')}
+      <span class="seat-row-label">${escapeHtml(row)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bookingContent').innerHTML = `
+    <div class="booking-wrapper">
+      <div class="seat-section">
+        <h2 style="margin-bottom:8px;">${escapeHtml(phim.tenPhim || 'Phim')}</h2>
+        <p style="color:var(--text-muted);margin-bottom:24px;">
+          <i class="fas fa-map-marker-alt"></i> ${escapeHtml(rap.tenRap || '')} – ${escapeHtml(phong.tenPhong || '')}
+          &nbsp;|&nbsp; <i class="fas fa-clock"></i> ${formatTime(suatChieu.gioChieu)} – ${formatDate(suatChieu.ngayChieu)}
+        </p>
+
+        <div class="screen-indicator">
+          <div class="screen-line"></div>
+          <span class="screen-label">Màn hình</span>
+        </div>
+
+        <div class="seat-map">${seatMapHTML}</div>
+
+        <div class="seat-legend">
+          <div class="legend-item"><div class="legend-box"></div>Thường</div>
+          <div class="legend-item"><div class="legend-box vip"></div>VIP</div>
+          <div class="legend-item"><div class="legend-box sw"></div>Sweetbox</div>
+          <div class="legend-item"><div class="legend-box sel"></div>Đang chọn</div>
+          <div class="legend-item"><div class="legend-box bk"></div>Đã đặt</div>
+        </div>
+      </div>
+
+      <div class="booking-summary" id="bookingSummary">
+        <div class="summary-movie">
+          <img class="summary-poster" src="${getPosterUrl(phim.poster)}" alt="">
+          <div class="summary-info">
+            <h3>${escapeHtml(phim.tenPhim || '')}</h3>
+            <p style="font-size:.85rem;color:var(--text-muted);">${escapeHtml(rap.tenRap || '')} – ${escapeHtml(phong.tenPhong || '')}</p>
+            <p style="font-size:.85rem;color:var(--text-muted);">${formatTime(suatChieu.gioChieu)} · ${formatDate(suatChieu.ngayChieu)}</p>
+          </div>
+        </div>
+        <div class="summary-row"><span>Ghế đã chọn</span><span id="summSeats">–</span></div>
+        <div class="summary-row"><span>Giá vé cơ bản</span><span id="summBase">0₫</span></div>
+        <div class="summary-row"><span>Phụ thu ghế</span><span id="summExtra">0₫</span></div>
+        <div class="summary-row total-row"><span>Tổng cộng</span><span id="summTotal">0₫</span></div>
+        <button class="btn-book" id="btnBook" disabled onclick="confirmBooking()">Đặt vé</button>
+      </div>
+    </div>`;
+}
+
+function toggleSeat(el) {
+  const maGhe = el.dataset.ma;
+  const idx = selectedSeats.findIndex(s => s.maGhe === maGhe);
+  if (idx >= 0) {
+    selectedSeats.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    if (selectedSeats.length >= 8) { showToast('Tối đa 8 ghế mỗi lần đặt', 'error'); return; }
+    selectedSeats.push({ maGhe, tenGhe: el.dataset.ten, phuThu: parseFloat(el.dataset.gia) || 0 });
+    el.classList.add('selected');
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const basePrice = 75000; // Base ticket price
+  const total = selectedSeats.reduce((sum, s) => sum + basePrice + s.phuThu, 0);
+  const extraTotal = selectedSeats.reduce((sum, s) => sum + s.phuThu, 0);
+
+  document.getElementById('summSeats').textContent = selectedSeats.length ? selectedSeats.map(s => s.tenGhe).join(', ') : '–';
+  document.getElementById('summBase').textContent = formatCurrency(basePrice * selectedSeats.length);
+  document.getElementById('summExtra').textContent = formatCurrency(extraTotal);
+  document.getElementById('summTotal').textContent = formatCurrency(total);
+  document.getElementById('btnBook').disabled = !selectedSeats.length;
+}
+
+function confirmBooking() {
+  if (!selectedSeats.length) return;
+  const user = getUser();
+  if (!user) {
+    showToast('Vui lòng đăng nhập để đặt vé', 'error');
+    sessionStorage.setItem('utc_redirect', window.location.href);
+    setTimeout(() => location.href = 'dang-nhap.html', 1500);
+    return;
+  }
+  // Build confirmation message
+  const names = selectedSeats.map(s => s.tenGhe).join(', ');
+  if (confirm(`Xác nhận đặt ${selectedSeats.length} vé (ghế: ${names})?`)) {
+    // In a real app this would POST to the backend
+    showToast('Đặt vé thành công! Cảm ơn quý khách.', 'success');
+    setTimeout(() => location.href = 'index.html', 2000);
+  }
+}
+</script>
+</body>
+</html>

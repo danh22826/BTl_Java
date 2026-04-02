@@ -3,87 +3,161 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chi tiết phim</title>
+    <title>Chi tiet phim</title>
     <link rel="stylesheet" href="../css/ChiTietPhim.css" />
 </head>
 <body>
 <header class="site-header lotte-style">
     <div class="account-bar">
-        <a href="../dangKi-dangNhap/dang_nhap.html">Đăng nhập</a>
+        <a href="../dangKi-dangNhap/dang_nhap.html">Dang nhap</a>
         <span>|</span>
-        <a href="../dangKi-dangNhap/dang_ki.html">Đăng ký</a>
+        <a href="../dangKi-dangNhap/dang_ki.html">Dang ky</a>
     </div>
 
     <div class="lotte-logo-bar">
         <div class="lotte-logo">
-            <img
-                    src="../poster/logo.png"
-                    alt="UTC logo"
-            />
+            <img src="../poster/logo.png" alt="UTC logo" />
             <span>UTC CINEMA</span>
         </div>
     </div>
 
     <nav class="lotte-menu-bar">
-        <!-- Trang chính: coi như đang ở mục PHIM -->
         <a href="main.html">PHIM</a>
         <span class="divider">|</span>
-        <a href="../gia_ve/giave.html">MUA VÉ</a>
+        <a href="../gia_ve/giave.html">MUA VE</a>
         <span class="divider">|</span>
-        <a href="../menu.html">RẠP CHIẾU PHIM</a>
+        <a href="../menu.html">RAP CHIEU PHIM</a>
         <span class="divider">|</span>
-        <a href="../KhuyenMai/khuyen_mai_page.html">TIN MỚI & ƯU ĐÃI</a>
+        <a href="../KhuyenMai/khuyen_mai_page.html">TIN MOI & UU DAI</a>
         <span class="divider">|</span>
-        <a href="../lienHe/lien_he.html">LIÊN HỆ</a>
+        <a href="../lienHe/lien_he.html">LIEN HE</a>
     </nav>
 </header>
-<div class="movie-detail-page">
-    <div class="movie-top">
-        <div class="movie-left">
-            <div class="movie-poster-box">
-                <img id="movie-poster" src="" alt="Poster phim" />
+
+<main class="movie-detail-page">
+    <section class="hero-stage">
+        <button class="hero-nav prev" type="button" aria-label="Anh truoc">&#10094;</button>
+        <div class="hero-frame">
+            <div class="hero-media-slot">
+                <img id="movie-hero" src="" alt="Anh gioi thieu phim" />
+                <div class="hero-overlay">
+                    <div class="hero-kicker">NOW SHOWING</div>
+                    <h1 id="movie-title-hero">DANG CAP NHAT</h1>
+                    <p id="movie-tagline">
+                        Khung banner de nhung trailer, poster ngang hoac hinh quang ba tu du lieu phim.
+                    </p>
+                </div>
             </div>
-            <button class="book-btn">Đặt vé</button>
         </div>
+        <button class="hero-nav next" type="button" aria-label="Anh sau">&#10095;</button>
+    </section>
 
-        <div class="movie-right">
-            <div class="movie-header">
-                <h1 id="movie-title"></h1>
-                <div class="movie-share">
+    <section class="detail-shell">
+        <aside class="side-promo-slot">
+            <div class="promo-card">
+                <div class="slot-label">PROMO</div>
+                <img id="movie-side-banner" src="" alt="Banner doc phim" />
+            </div>
+        </aside>
 
+        <div class="detail-main">
+            <div class="thumb-strip">
+                <button class="thumb-arrow" type="button" aria-label="Thu nho trai">&#10094;</button>
+                <div class="thumb-list">
+                    <button class="thumb-card is-active" type="button">
+                        <img id="movie-thumb-1" src="" alt="Thumbnail 1" />
+                    </button>
+                    <button class="thumb-card" type="button">
+                        <img id="movie-thumb-2" src="" alt="Thumbnail 2" />
+                    </button>
+                    <button class="thumb-card" type="button">
+                        <img id="movie-thumb-3" src="" alt="Thumbnail 3" />
+                    </button>
+                </div>
+                <button class="thumb-arrow" type="button" aria-label="Thu nho phai">&#10095;</button>
+            </div>
+
+            <div class="movie-top">
+                <div class="movie-left">
+                    <div class="movie-poster-card">
+                        <div class="slot-label">POSTER</div>
+                        <div class="movie-poster-box">
+                            <img id="movie-poster" src="" alt="Poster phim" />
+                        </div>
+                        <button class="book-btn" type="button">Dat ve</button>
+                    </div>
+                </div>
+
+                <div class="movie-right">
+                    <div class="movie-header-card">
+                        <div class="movie-header-main">
+                            <p class="section-kicker">CHI TIET PHIM</p>
+                            <h2 id="movie-title">Dang cap nhat</h2>
+                        </div>
+                        <div class="movie-share">
+                            <a class="share-btn facebook" href="#" aria-label="Facebook">f</a>
+                            <a class="share-btn url" href="#" aria-label="Sao chep link">URL</a>
+                        </div>
+                    </div>
+
+                    <div class="rating-panel">
+                        <span class="label">Xem xep hang</span>
+                        <span class="stars" id="movie-stars">★★★★★</span>
+                        <span class="score" id="movie-score">9.5</span>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <span class="label">Xep hang</span>
+                            <span id="movie-age">Dang cap nhat</span>
+                        </div>
+                        <div class="info-card">
+                            <span class="label">Ngay phat hanh</span>
+                            <span id="movie-release">Dang cap nhat</span>
+                        </div>
+                        <div class="info-card info-card-wide">
+                            <span class="label">Thong tin co ban</span>
+                            <span id="movie-basic">Dang cap nhat</span>
+                        </div>
+                        <div class="info-card info-card-wide">
+                            <span class="label">Ngon ngu</span>
+                            <span id="movie-language">Dang cap nhat</span>
+                        </div>
+                        <div class="info-card info-card-wide">
+                            <span class="label">Loai</span>
+                            <span id="movie-format">Dang cap nhat</span>
+                        </div>
+                    </div>
+
+                    <div class="meta-strip">
+                        <div class="meta-box">
+                            <span class="meta-label">Ma phim</span>
+                            <strong id="movie-code">---</strong>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-label">Thoi luong</span>
+                            <strong id="movie-duration">---</strong>
+                        </div>
+                        <div class="meta-box">
+                            <span class="meta-label">Poster</span>
+                            <strong id="movie-poster-file">default.jpg</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-
-
-            <div class="movie-info-row">
-                <span class="label">Xếp hạng:</span>
-                <span id="movie-age"></span>
-            </div>
-            <div class="movie-info-row">
-                <span class="label">Ngày phát hành:</span>
-                <span id="movie-release"></span>
-            </div>
-            <div class="movie-info-row">
-                <span class="label">Thời lượng:</span>
-                <span id="movie-basic"></span>
-            </div>
-            <div class="movie-info-row">
-                <span class="label">Ngôn ngữ:</span>
-                <span id="movie-language"></span>
-            </div>
-            <div class="movie-info-row">
-                <span class="label">Thể loại:</span>
-                <span id="movie-format"></span>
-            </div>
+            <section class="movie-summary">
+                <div class="section-heading">
+                    <span class="section-kicker">NOI DUNG</span>
+                    <h3>Tom tat</h3>
+                </div>
+                <div class="summary-box">
+                    <p id="movie-summary-text"></p>
+                </div>
+            </section>
         </div>
-    </div>
-
-    <div class="movie-summary">
-        <h2>Tóm tắt</h2>
-        <p id="movie-summary-text"></p>
-    </div>
-</div>
+    </section>
+</main>
 
 <script src="/js/ChiTietPhim.js"></script>
 </body>

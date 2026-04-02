@@ -1,9 +1,11 @@
 package com.example.demo.dto.request.LoaiGhe;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 public class UpdateLoaiGheRequest {
 
@@ -12,25 +14,14 @@ public class UpdateLoaiGheRequest {
     private String tenLoaiGhe;
 
     @NotNull(message = "Giá phụ thu không được để trống")
-    @Min(value = 0, message = "Giá phụ thu phải >= 0")
-    private Double giaPhuThu;
+    @DecimalMin(value = "0.0", inclusive = true, message = "Giá phụ thu phải >= 0")
+    private BigDecimal giaPhuThu;
 
-    public UpdateLoaiGheRequest() {
-    }
+    public UpdateLoaiGheRequest() {}
 
-    public String getTenLoaiGhe() {
-        return tenLoaiGhe;
-    }
+    public String getTenLoaiGhe() { return tenLoaiGhe; }
+    public void setTenLoaiGhe(String tenLoaiGhe) { this.tenLoaiGhe = tenLoaiGhe; }
 
-    public void setTenLoaiGhe(String tenLoaiGhe) {
-        this.tenLoaiGhe = tenLoaiGhe;
-    }
-
-    public Double getGiaPhuThu() {
-        return giaPhuThu;
-    }
-
-    public void setGiaPhuThu(Double giaPhuThu) {
-        this.giaPhuThu = giaPhuThu;
-    }
+    public BigDecimal getGiaPhuThu() { return giaPhuThu; }
+    public void setGiaPhuThu(BigDecimal giaPhuThu) { this.giaPhuThu = giaPhuThu; }
 }

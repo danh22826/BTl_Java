@@ -6,12 +6,13 @@ import com.example.demo.dto.response.LoaiPhongResponse;
 import com.example.demo.entity.LoaiPhong;
 import com.example.demo.repository.LoaiPhongRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
-
+@Transactional(readOnly = true)
 @Service
 public class LoaiPhongService {
-
     private final LoaiPhongRepository loaiPhongRepository;
 
     public LoaiPhongService(LoaiPhongRepository loaiPhongRepository) {
@@ -31,7 +32,7 @@ public class LoaiPhongService {
 
         return toResponse(loaiPhong);
     }
-
+    @Transactional
     public LoaiPhongResponse createLoaiPhong(CreateLoaiPhongRequest request) {
         if (loaiPhongRepository.existsById(request.getMaLoaiPhong())) {
             throw new RuntimeException("Mã loại phòng đã tồn tại");
@@ -47,7 +48,7 @@ public class LoaiPhongService {
 
         return toResponse(loaiPhongRepository.save(loaiPhong));
     }
-
+    @Transactional
     public LoaiPhongResponse updateLoaiPhong(String maLoaiPhong, UpdateLoaiPhongRequest request) {
         LoaiPhong loaiPhong = loaiPhongRepository.findById(maLoaiPhong)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy loại phòng với mã: " + maLoaiPhong));
@@ -56,7 +57,7 @@ public class LoaiPhongService {
 
         return toResponse(loaiPhongRepository.save(loaiPhong));
     }
-
+    @Transactional
     public void deleteLoaiPhong(String maLoaiPhong) {
         if (!loaiPhongRepository.existsById(maLoaiPhong)) {
             throw new RuntimeException("Không tìm thấy loại phòng với mã: " + maLoaiPhong);

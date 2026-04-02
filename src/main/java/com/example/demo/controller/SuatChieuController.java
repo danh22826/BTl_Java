@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.SuatChieu.CreateSuatChieuRequest;
 import com.example.demo.dto.request.SuatChieu.UpdateSuatChieuRequest;
+import com.example.demo.dto.response.PhimTheoNgayResponse;
+import com.example.demo.dto.response.SuatChieuConHanResponse;
 import com.example.demo.dto.response.SuatChieuResponse;
 import com.example.demo.service.SuatChieuService;
 import jakarta.validation.Valid;
@@ -10,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/suat-chieu")
@@ -24,7 +25,7 @@ public class SuatChieuController {
     }
 
     @GetMapping("/tim-phim")
-    public ResponseEntity<List<Map<String, Object>>> timPhimTheoNgayVaRap(
+    public ResponseEntity<List<PhimTheoNgayResponse>> timPhimTheoNgayVaRap(
             @RequestParam String maRap,
             @RequestParam String ngay
     ) {
@@ -32,7 +33,7 @@ public class SuatChieuController {
     }
 
     @GetMapping("/tim-suat")
-    public ResponseEntity<List<Map<String, Object>>> timSuatChieuConHan(
+    public ResponseEntity<List<SuatChieuConHanResponse>> timSuatChieuConHan(
             @RequestParam String maPhim,
             @RequestParam String maRap,
             @RequestParam String ngay

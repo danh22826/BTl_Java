@@ -1,3 +1,37 @@
+// ===== AUTHENTICATION MANAGEMENT =====
+function checkAuthStatus() {
+  const isLoggedIn = sessionStorage.getItem('loggedInUser') !== null;
+  const logoutView = document.getElementById('logoutView');
+  const loginView = document.getElementById('loginView');
+
+  if (logoutView && loginView) {
+    if (isLoggedIn) {
+      logoutView.style.display = 'none';
+      loginView.style.display = 'flex';
+    } else {
+      logoutView.style.display = 'flex';
+      loginView.style.display = 'none';
+    }
+  }
+}
+
+function handleLogout(e) {
+  e.preventDefault();
+  if (confirm('Bạn chắc chắn muốn đăng xuất?')) {
+    sessionStorage.removeItem('loggedInUser');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('isLoggedIn');
+    checkAuthStatus();
+    alert('Đã đăng xuất thành công');
+  }
+}
+
+// Initialize auth status on page load
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuthStatus();
+});
+
+// ===== HERO SLIDER =====
 const heroSlides = [...document.querySelectorAll('.hero-slide')];
 const heroDots = [...document.querySelectorAll('.hero-dot')];
 const prevBtn = document.querySelector('.hero-prev');
@@ -16,150 +50,69 @@ heroDots.forEach((dot, i) => dot.addEventListener('click', () => showHeroSlide(i
 
 setInterval(() => showHeroSlide(heroIndex + 1), 5000);
 
-const API_PHIM = "http://localhost:8080/api/phim";
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Gọi API lấy danh sách phim
+    fetch('http://localhost:8080/api/phim')
+        .then(response => {
+            if (!response.ok) throw new Error("Không thể kết nối đến server");
+            return response.json();
+        })
+        .then(data => {
+            renderMovies(data);
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            document.querySelectorAll('.loading-text').forEach(el => el.innerText = "Lỗi tải dữ liệu!");
+        });
+});
 
-const SO_PHIM_MOI_TRANG = 12;
-let danhSachPhim = [];
-let trangHienTai = 1;
-let daMoPhanTrang = false;
+function renderMovies(movies) {
+    const nowShowingContainer = document.getElementById('now-showing-container');
+    const comingSoonContainer = document.getElementById('coming-soon-container');
 
-function tongSoTrang() {
-  return Math.ceil(danhSachPhim.length / SO_PHIM_MOI_TRANG);
+    // Xóa dòng "Đang tải..."
+    nowShowingContainer.innerHTML = '';
+    comingSoonContainer.innerHTML = '';
+
+    const today = new Date();
+
+    movies.forEach(movie => {
+        // Phân loại phim dựa trên ngày khởi chiếu
+        const releaseDate = new Date(movie.ngayKhoiChieu);
+
+        // Tạo HTML cho thẻ phim
+        const movieCard = `
+            <article class="movie-card" data-movie-id="${movie.maPhim}">
+                <div class="card-poster">
+                    <div class="card-meta-top">
+                        <span class="badge-status">${releaseDate <= today ? 'Đang chiếu' : 'Sắp chiếu'}</span>
+                        <span class="badge-rating"><i class="fas fa-star"></i> 8.5</span>
+                    </div>
+                    <img src="${movie.poster || 'https://via.placeholder.com/300x450'}" alt="${movie.tenPhim}" />
+                    <div class="button-group">
+                        <a href="../movie/movie-detail.html?id=${movie.maPhim}" class="buy-btn detail-btn">Xem chi tiết</a>
+                        <a href="../gia_ve/giave.html?movie_id=${movie.maPhim}" class="buy-btn">Mua vé ngay</a>
+                    </div>
+                </div>
+                <div class="card-info">
+                    <h3>${movie.tenPhim}</h3>
+                    <div class="meta-line">
+                        <span><i class="far fa-clock"></i> ${movie.thoiLuong} phút</span>
+                        <span>•</span>
+                        <span>${movie.doTuoiPhuHop}</span>
+                    </div>
+                    <div class="genre-tags">
+                        ${movie.theLoais.map(tag => `<span>${tag}</span>`).join('')}
+                    </div>
+                </div>
+            </article>
+        ;
+
+        // Đổ vào đúng khung (Container)
+        if (releaseDate <= today) {
+            nowShowingContainer.innerHTML += movieCard;
+        } else {
+            comingSoonContainer.innerHTML += movieCard;
+        }
+    });
 }
-
-function layPhimTheoTrang(trang) {
-  const start = (trang - 1) * SO_PHIM_MOI_TRANG;
-  const end = start + SO_PHIM_MOI_TRANG;
-  return danhSachPhim.slice(start, end);
-}
-
-function xemChiTiet(maPhim) {
-  window.location.href = `/html/chitietphim.html?id=${maPhim}`;
-}
-
-function datVe(maPhim) {
-  window.location.href = `/html/chitietphim.html?id=${maPhim}`;
-}
-
-function taoCard(phim) {
-  const poster = `/poster/${phim.poster?.split("/").pop() || "default.jpg"}`;
-
-  return `
-    <article class="movie-card">
-      <div class="card-poster">
-
-
-        <img src="${poster}" alt="${phim.tenPhim}"
-             onerror="this.src='/poster/default.jpg'" />
-
-        <div class="button-group" onclick="event.stopPropagation()">
-          <button class="buy-btn" onclick="datVe('${phim.maPhim}')">Mua vé ngay</button>
-          <button class="detail-btn" onclick="xemChiTiet('${phim.maPhim}')">Chi tiết</button>
-        </div>
-      </div>
-
-      <div class="card-info">
-        <h3>${phim.tenPhim || "Chưa có tên phim"}</h3>
-        <div class="meta-line">
-          <span><i class="far fa-clock"></i> ${phim.thoiLuong || 0} phút</span>
-          <span>•</span>
-          <span>${phim.doTuoiPhuHop || "K"}</span>
-        </div>
-        <div class="genre-tags">
-          ${
-            phim.theLoais?.length > 0
-              ? phim.theLoais.map(tl => `<span>${tl.tenTheLoai}</span>`).join("")
-              : "<span>Chưa cập nhật</span>"
-          }
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function hienThiPhim() {
-  const grid = document.getElementById("movie-grid");
-  const dsPhimTrang = layPhimTheoTrang(trangHienTai);
-
-  if (dsPhimTrang.length === 0) {
-    grid.innerHTML = `
-      <div class="movie-loading">
-        <p>Không có dữ liệu phim</p>
-      </div>
-    `;
-    return;
-  }
-
-  grid.innerHTML = dsPhimTrang.map(taoCard).join("");
-}
-
-function hienThiPhanTrang() {
-  const phanTrangEl = document.getElementById("phan-trang");
-  const total = tongSoTrang();
-
-  let html = "";
-
-  for (let i = 1; i <= total; i++) {
-    html += `
-      <button class="${i === trangHienTai ? "active" : ""}" onclick="chuyenTrang(${i})">
-        ${i}
-      </button>
-    `;
-  }
-
-  phanTrangEl.innerHTML = html;
-}
-
-function chuyenTrang(trang) {
-  trangHienTai = trang;
-  hienThiPhim();
-  hienThiPhanTrang();
-
-  document.getElementById("movie-grid")?.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-
-window.chuyenTrang = chuyenTrang;
-window.xemChiTiet = xemChiTiet;
-window.datVe = datVe;
-
-function khoiTaoDanhSachPhim(data) {
-  danhSachPhim = data;
-  trangHienTai = 1;
-
-  document.getElementById("movie-count").innerText =
-    `${danhSachPhim.length} phim • ${tongSoTrang()} trang`;
-
-  hienThiPhim();
-  hienThiPhanTrang();
-
-  const btnXemThem = document.getElementById("btn-xem-them");
-  const phanTrangEl = document.getElementById("phan-trang");
-
-  btnXemThem.addEventListener("click", function () {
-    daMoPhanTrang = !daMoPhanTrang;
-    phanTrangEl.style.display = daMoPhanTrang ? "flex" : "none";
-    btnXemThem.innerText = daMoPhanTrang ? "Ẩn bớt" : "Xem thêm";
-  });
-}
-
-fetch(API_PHIM)
-  .then(response => {
-    if (!response.ok) throw new Error("Không thể tải danh sách phim");
-    return response.json();
-  })
-  .then(data => {
-    khoiTaoDanhSachPhim(data);
-  })
-  .catch(error => {
-    console.error(error);
-    document.getElementById("movie-grid").innerHTML = `
-      <div class="movie-loading">
-        <p style="color:#e50914">Không tải được dữ liệu phim</p>
-      </div>
-    `;
-    document.getElementById("movie-count").innerText = "";
-    document.getElementById("btn-xem-them").style.display = "none";
-  });

@@ -1,0 +1,52 @@
+/* Breadcrumb Styles */
+.breadcrumb-nav {
+    padding: 12px 0;
+    background: var(--bg-beige);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.breadcrumb-container {
+    font-size: .85rem;
+    color: var(--text-muted);
+}
+
+.breadcrumb-link {
+    color: var(--accent-gold);
+    text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+/* Showtime Section Styles */
+.showtime-section {
+    background: var(--bg-beige);
+    padding: 32px 0;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.select-city { max-width: 200px; }
+.select-cinema { max-width: 220px; }
+.input-date { max-width: 180px; }
+
+/* Empty State & Error Colors */
+.empty-state h3 {
+    margin-top: 15px;
+    color: inherit;
+}
+
+.error-text-white {
+    color: #fff !important;
+}
+
+/* Các class khác nếu cần bổ sung cho phần Render linh hoạt */
+.movie-detail-actions .btn {
+    margin-right: 10px;
+}

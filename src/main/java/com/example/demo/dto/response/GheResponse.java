@@ -1,5 +1,7 @@
 package com.example.demo.dto.response;
 
+import java.math.BigDecimal;
+
 public class GheResponse {
 
     private String maGhe;
@@ -9,7 +11,7 @@ public class GheResponse {
 
     private String maLoaiGhe;
     private String tenLoaiGhe;
-    private Double giaPhuThu;
+    private BigDecimal giaPhuThu;
 
     public GheResponse() {
     }
@@ -54,11 +56,11 @@ public class GheResponse {
         this.tenLoaiGhe = tenLoaiGhe;
     }
 
-    public Double getGiaPhuThu() {
+    public BigDecimal getGiaPhuThu() {
         return giaPhuThu;
     }
 
-    public void setGiaPhuThu(Double giaPhuThu) {
+    public void setGiaPhuThu(BigDecimal giaPhuThu) {
         this.giaPhuThu = giaPhuThu;
     }
 }

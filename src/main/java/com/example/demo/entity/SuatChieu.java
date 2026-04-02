@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -21,24 +22,22 @@ public class SuatChieu {
     private LocalTime gioChieu;
 
     @Column(name = "Gia", nullable = false)
-    private Double gia;
+    private BigDecimal gia;
 
-    // ===== FK -> Phim =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaPhim", nullable = false)
     @JsonIgnoreProperties({"suatChieus"})
     private Phim phim;
 
-    // ===== FK -> PhongChieu =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaPhong", nullable = false)
     @JsonIgnoreProperties({"ghes", "suatChieus"})
     private PhongChieu phongChieu;
 
-    public SuatChieu() {
-    }
+    public SuatChieu() {}
 
-    public SuatChieu(String maSuat, LocalDate ngayChieu, LocalTime gioChieu, Double gia, Phim phim, PhongChieu phongChieu) {
+    public SuatChieu(String maSuat, LocalDate ngayChieu, LocalTime gioChieu,
+                     BigDecimal gia, Phim phim, PhongChieu phongChieu) {
         this.maSuat = maSuat;
         this.ngayChieu = ngayChieu;
         this.gioChieu = gioChieu;
@@ -47,51 +46,21 @@ public class SuatChieu {
         this.phongChieu = phongChieu;
     }
 
-    public String getMaSuat() {
-        return maSuat;
-    }
+    public String getMaSuat() { return maSuat; }
+    public void setMaSuat(String maSuat) { this.maSuat = maSuat; }
 
-    public void setMaSuat(String maSuat) {
-        this.maSuat = maSuat;
-    }
+    public LocalDate getNgayChieu() { return ngayChieu; }
+    public void setNgayChieu(LocalDate ngayChieu) { this.ngayChieu = ngayChieu; }
 
-    public LocalDate getNgayChieu() {
-        return ngayChieu;
-    }
+    public LocalTime getGioChieu() { return gioChieu; }
+    public void setGioChieu(LocalTime gioChieu) { this.gioChieu = gioChieu; }
 
-    public void setNgayChieu(LocalDate ngayChieu) {
-        this.ngayChieu = ngayChieu;
-    }
+    public BigDecimal getGia() { return gia; }
+    public void setGia(BigDecimal gia) { this.gia = gia; }
 
-    public LocalTime getGioChieu() {
-        return gioChieu;
-    }
+    public Phim getPhim() { return phim; }
+    public void setPhim(Phim phim) { this.phim = phim; }
 
-    public void setGioChieu(LocalTime gioChieu) {
-        this.gioChieu = gioChieu;
-    }
-
-    public Double getGia() {
-        return gia;
-    }
-
-    public void setGia(Double gia) {
-        this.gia = gia;
-    }
-
-    public Phim getPhim() {
-        return phim;
-    }
-
-    public void setPhim(Phim phim) {
-        this.phim = phim;
-    }
-
-    public PhongChieu getPhongChieu() {
-        return phongChieu;
-    }
-
-    public void setPhongChieu(PhongChieu phongChieu) {
-        this.phongChieu = phongChieu;
-    }
+    public PhongChieu getPhongChieu() { return phongChieu; }
+    public void setPhongChieu(PhongChieu phongChieu) { this.phongChieu = phongChieu; }
 }

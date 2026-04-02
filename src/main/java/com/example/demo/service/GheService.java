@@ -4,13 +4,15 @@ import com.example.demo.dto.request.Ghe.CreateGheRequest;
 import com.example.demo.dto.response.GheResponse;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class GheService {
-
     private final GheRepository gheRepo;
     private final PhongChieuRepository phongRepo;
     private final LoaiGheRepository loaiRepo;
@@ -32,6 +34,7 @@ public class GheService {
     }
 
     // Tạo ghế
+    @Transactional
     public GheResponse create(CreateGheRequest req) {
 
         if (gheRepo.existsByPhongChieu_MaPhongAndSoHangAndSoCot(

@@ -80,6 +80,31 @@ button {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.auth-status {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.auth-status a {
+  color: #f2f2f2;
+  text-decoration: none;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-status a:hover {
+  color: #ffffff;
+}
+
+.auth-status span {
+  color: #666;
+}
+
 /* block logo header styles copied from khuyen_mai.css */
 .lotte-style {
   background: #efefef;
@@ -490,11 +515,14 @@ main {
   right: 18px;
   bottom: 18px;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .buy-btn {
   width: 100%;
-  min-height: 52px;
+  min-height: 48px;
   border: 0;
   border-radius: 18px;
   font-weight: 800;
@@ -502,11 +530,28 @@ main {
   transition: 0.22s ease;
   background: var(--primary);
   color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .buy-btn:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
+  color: #fff;
+}
+
+.buy-btn.detail-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.buy-btn.detail-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #fff;
 }
 
 .card-info {
@@ -620,10 +665,36 @@ main {
 
 .coming-info {
   padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 120px; /* Đảm bảo height đồng nhất */
+}
+
+.coming-info h3 {
+  margin: 0 0 8px;
+  font-size: clamp(1.25rem, 1.6vw, 1.85rem);
+  line-height: 1.3;
+  font-weight: 700;
 }
 
 .coming-info .meta-line {
-  margin-bottom: 0;
+  margin-bottom: 12px;
+}
+
+.coming-info .genre-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.coming-info .genre-tags span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--pill);
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 500;
 }
 
 /* ===== FOOTER ===== */
@@ -720,7 +791,23 @@ main {
   color: var(--muted-2);
 }
 
+/* ===== RESPONSIVE ===== */
 
+@media (max-width: 1200px) {
+  .feature-grid,
+  .upcoming-grid,
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .account-bar {
+    justify-content: center;
+    padding: 0 12px;
+    font-size: 13px;
+    height: 38px;
+  }
 
   .brand-bar {
     min-height: 110px;
@@ -788,231 +875,41 @@ main {
     font-size: 1.55rem;
   }
 }
-.upcoming-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+
+/* ===== FIX: Hero slide bị cắt chữ ===== */
+
+.cgv-hero {
+  overflow: visible;
 }
 
-.xem-them-wrap {
-    text-align: center;
-    margin-top: 28px;
+.hero-slides {
+  overflow: hidden; /* giữ clip cho container ngoài */
 }
 
-.xem-them-btn {
-    background: #e50914;
-    color: #fff;
-    border: none;
-    padding: 12px 26px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem;
+.hero-slide {
+  /* Thay fixed height → min-height để tự giãn theo nội dung */
+  height: auto;
+  min-height: 480px;
+  overflow: visible;
 }
 
-.xem-them-btn:hover {
-    background: #b80710;
+.hero-content {
+  position: relative;        /* tách khỏi absolute nếu đang bị */
+  padding: 40px 60px;
+  z-index: 2;
+  overflow: visible;
 }
 
-.phan-trang {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 18px;
+.hero-content h1 {
+  /* Giới hạn chữ đầu header để không quá lớn ở mọi kích thước */
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1.2;
+  white-space: normal;       /* cho phép xuống dòng */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: visible;
 }
 
-.phan-trang button {
-    min-width: 42px;
-    height: 42px;
-    border: none;
-    border-radius: 6px;
-    background: #2b2b2b;
-    color: #fff;
-    cursor: pointer;
-    font-weight: 600;
+.hero-content p {
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
 }
-
-.phan-trang button:hover {
-    background: #444;
-}
-
-.phan-trang button.active {
-    background: #e50914;
-}
-
-.movie-loading {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 50px;
-    color: #999;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #333;
-    border-top-color: #e50914;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.section-block {
-  width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
-  padding: 36px 0 12px;
-}
-
-.upcoming-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 190px);
-  justify-content: center;
-  gap: 18px;
-}
-
-.movie-card,
-.coming-card {
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: none;
-}
-
-.card-poster,
-.coming-poster {
-  position: relative;
-  width: 100%;
-  height: 285px;
-  overflow: hidden;
-  background: #111;
-}
-
-.card-poster img,
-.coming-poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.card-poster::after,
-.coming-poster::after {
-  display: none;
-}
-
-.card-info,
-.coming-info {
-  padding: 8px 10px 10px;
-  background: #fff;
-}
-
-.card-info h3,
-.coming-info h3 {
-  margin: 0 0 6px;
-  color: #1d1d1d;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.25;
-  text-transform: uppercase;
-}
-
-.meta-line {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  color: #6b7280;
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 500;
-  flex-wrap: wrap;
-}
-
-.genre-tags {
-  display: none;
-}
-
-.button-group {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 74%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.movie-card:hover .button-group,
-.coming-card:hover .button-group {
-  opacity: 1;
-}
-
-.buy-btn,
-.detail-btn {
-  width: 100%;
-  min-height: 38px;
-  border: 1px solid rgba(255,255,255,0.75);
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-.detail-btn:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-}
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 860px) {
-  .account-bar {
-    justify-content: center;
-    padding: 0 12px;
-    font-size: 13px;
-    height: 38px;
-  }
-
-  .lotte-logo {
-    font-size: 1.4rem;
-    gap: 8px;
-  }
-
-  .lotte-logo img {
-    max-width: 70px;
-  }
-
-  .lotte-menu-bar {
-    gap: 10px;
-    min-height: 56px;
-    padding: 10px;
-    font-size: 0.92rem;
-  }
-}
-
-@media (max-width: 1200px) {
-  .feature-grid,
-  .upcoming-grid,
-  .footer-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 860px) {
-  .account-bar {
-    justify-content: center;
-    padding: 0 12px;
-    font-size: 13px;
-    height: 38px;
-  }

@@ -8,10 +8,12 @@ import com.example.demo.entity.ThanhPho;
 import com.example.demo.repository.RapRepository;
 import com.example.demo.repository.ThanhPhoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class RapService {
 
     private final RapRepository rapRepository;
@@ -35,7 +37,7 @@ public class RapService {
 
         return toResponse(rap);
     }
-
+    @Transactional
     public RapResponse createRap(CreateRapRequest request) {
 
         if (rapRepository.existsById(request.getMaRap())) {
@@ -53,7 +55,7 @@ public class RapService {
 
         return toResponse(rapRepository.save(rap));
     }
-
+    @Transactional
     public RapResponse updateRap(String maRap, UpdateRapRequest request) {
 
         Rap rap = rapRepository.findById(maRap)
@@ -68,7 +70,7 @@ public class RapService {
 
         return toResponse(rapRepository.save(rap));
     }
-
+@Transactional
     public void deleteRap(String maRap) {
         rapRepository.deleteById(maRap);
     }

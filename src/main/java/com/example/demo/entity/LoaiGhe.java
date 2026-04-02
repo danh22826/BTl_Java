@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "LoaiGhe")
@@ -16,7 +17,7 @@ public class LoaiGhe {
     private String tenLoaiGhe;
 
     @Column(name = "GiaPhuThu")
-    private Double giaPhuThu;
+    private BigDecimal giaPhuThu;
 
     @OneToMany(mappedBy = "loaiGhe")
     @JsonIgnore
@@ -41,11 +42,11 @@ public class LoaiGhe {
         this.tenLoaiGhe = tenLoaiGhe;
     }
 
-    public Double getGiaPhuThu() {
+    public BigDecimal getGiaPhuThu() {
         return giaPhuThu;
     }
 
-    public void setGiaPhuThu(Double giaPhuThu) {
+    public void setGiaPhuThu(BigDecimal giaPhuThu) {
         this.giaPhuThu = giaPhuThu;
     }
 
