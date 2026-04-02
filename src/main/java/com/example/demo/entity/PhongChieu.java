@@ -1,9 +1,5 @@
 package com.example.demo.entity;
 
-import com.example.demo.entity.Ghe;
-import com.example.demo.entity.LoaiPhong;
-import com.example.demo.entity.Rap;
-import com.example.demo.entity.SuatChieu;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -20,33 +16,50 @@ import java.util.List;
 public class PhongChieu {
 
     @Id
-    @Column(name = "MaPhong")
+    @Column(name = "MaPhong", nullable = false, length = 20)
     private String maPhong;
 
-    @Column(name = "TenPhong", nullable = false)
+    @Column(name = "TenPhong", nullable = false, length = 100)
     private String tenPhong;
 
     @Column(name = "SucChua", nullable = false)
     private Integer sucChua;
 
+    // ===== FK -> Rap =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaRap", nullable = false)
-    @JsonIgnoreProperties("phongChieus")
+    @JsonIgnoreProperties({"phongChieus"}) // tránh vòng lặp
     private Rap rap;
 
+    // ===== FK -> LoaiPhong =====
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaLoaiPhong", nullable = false)
-    @JsonIgnoreProperties("dsPhongChieu")
+    @JsonIgnoreProperties({"dsPhongChieu"})
     private LoaiPhong loaiPhong;
 
+    // ===== Quan hệ với Ghế =====
     @OneToMany(mappedBy = "phongChieu")
     @JsonIgnore
     private List<Ghe> ghes;
 
+    // ===== Quan hệ với Suất chiếu =====
     @OneToMany(mappedBy = "phongChieu")
     @JsonIgnore
     private List<SuatChieu> suatChieus;
 
+    // ===== Constructor =====
+    public PhongChieu() {
+    }
+
+    public PhongChieu(String maPhong, String tenPhong, Integer sucChua, Rap rap, LoaiPhong loaiPhong) {
+        this.maPhong = maPhong;
+        this.tenPhong = tenPhong;
+        this.sucChua = sucChua;
+        this.rap = rap;
+        this.loaiPhong = loaiPhong;
+    }
+
+    // ===== Getter & Setter =====
     public String getMaPhong() {
         return maPhong;
     }

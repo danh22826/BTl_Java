@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/phim")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Cái này hỗ trợ thêm CORS ở mức Controller
 public class PhimController {
 
     private final PhimService service;
@@ -23,6 +23,13 @@ public class PhimController {
 
     @GetMapping
     public List<PhimResponse> getAll() {
+        return service.getAll();
+    }
+
+    // 👉 THÊM ĐOẠN NÀY: API để Frontend lấy danh sách phim đang chiếu
+    @GetMapping("/dang-chieu")
+    public List<PhimResponse> getPhimDangChieu() {
+        // Tạm thời gọi hàm getAll() để trả về toàn bộ phim
         return service.getAll();
     }
 
