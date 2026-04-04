@@ -32,35 +32,55 @@ public interface SuatChieuRepository extends JpaRepository<SuatChieu, String> {
     """, nativeQuery = true)
     List<Map<String, Object>> timPhimTheoNgayVaRap(
             @Param("maRap") String maRap,
-            @Param("ngay")  LocalDate ngay
+            @Param("ngay") LocalDate ngay
     );
 
     @Query(value = """
         SELECT
             s.MaSuat,
-            CONVERT(VARCHAR(5), s.GioChieu, 108)  AS GioChieu,
+            CONVERT(VARCHAR(5), s.GioChieu, 108) AS GioChieu,
             s.Gia,
             ph.MaPhong,
             ph.TenPhong,
             lp.TenLoaiPhong,
-            ph.SucChua                             AS TongGhe,
             (
                 SELECT COUNT(*)
+                FROM Ghe g
+                WHERE g.MaPhong = ph.MaPhong
+            ) AS TongGhe,
+            (
+                SELECT COUNT(*)
+                FROM Ghe g
+                WHERE g.MaPhong = ph.MaPhong
+            ) - (
+                SELECT COUNT(*)
                 FROM Ve v
+                JOIN HoaDon hd ON hd.MaDon = v.MaDon
                 WHERE v.MaSuat = s.MaSuat
-                  AND v.TrangThaiVe = 'TRONG'
-            )                                      AS SoGheTrong
+                  AND (
+                    v.TrangThaiVe = 'DA_THANH_TOAN'
+                    OR (
+                        v.TrangThaiVe = 'DA_DAT'
+                        AND hd.TrangThai IN ('CHUA_THANH_TOAN', N'Chờ thanh toán')
+                        AND hd.ThoiGianDat >= DATEADD(MINUTE, -10, GETDATE())
+                    )
+                    OR (
+                        v.TrangThaiVe = 'DA_DAT'
+                        AND hd.TrangThai IN ('DA_THANH_TOAN', N'Đã thanh toán')
+                    )
+                  )
+            ) AS SoGheTrong
         FROM SuatChieu s
-        LEFT JOIN PhongChieu ph ON s.MaPhong      = ph.MaPhong
-        LEFT JOIN LoaiPhong  lp ON ph.MaLoaiPhong = lp.MaLoaiPhong
-        WHERE s.MaPhim    = :maPhim
+        LEFT JOIN PhongChieu ph ON s.MaPhong = ph.MaPhong
+        LEFT JOIN LoaiPhong lp ON ph.MaLoaiPhong = lp.MaLoaiPhong
+        WHERE s.MaPhim = :maPhim
           AND s.NgayChieu = :ngay
           AND (ph.MaRap = :maRap OR s.MaRap = :maRap)
         ORDER BY s.GioChieu
     """, nativeQuery = true)
     List<Map<String, Object>> timSuatChieuConHan(
             @Param("maPhim") String maPhim,
-            @Param("maRap")  String maRap,
-            @Param("ngay")   LocalDate ngay
+            @Param("maRap") String maRap,
+            @Param("ngay") LocalDate ngay
     );
 }

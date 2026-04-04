@@ -11,9 +11,9 @@ public class SuatChieuResponse {
     private LocalTime gioChieu;
     private BigDecimal gia;
 
-    // Trải phẳng thông tin Phim, Phòng, Rạp
     private String maPhim;
     private String tenPhim;
+    private String poster;
 
     private String maPhong;
     private String tenPhong;
@@ -21,36 +21,91 @@ public class SuatChieuResponse {
     private String maRap;
     private String tenRap;
 
-    public SuatChieuResponse() {
+    public String getMaSuat() {
+        return maSuat;
     }
 
-    public String getMaSuat() { return maSuat; }
-    public void setMaSuat(String maSuat) { this.maSuat = maSuat; }
+    public void setMaSuat(String maSuat) {
+        this.maSuat = maSuat;
+    }
 
-    public LocalDate getNgayChieu() { return ngayChieu; }
-    public void setNgayChieu(LocalDate ngayChieu) { this.ngayChieu = ngayChieu; }
+    public LocalDate getNgayChieu() {
+        return ngayChieu;
+    }
 
-    public LocalTime getGioChieu() { return gioChieu; }
-    public void setGioChieu(LocalTime gioChieu) { this.gioChieu = gioChieu; }
+    public void setNgayChieu(LocalDate ngayChieu) {
+        this.ngayChieu = ngayChieu;
+    }
 
-    public BigDecimal getGia() { return gia; }
-    public void setGia(BigDecimal gia) { this.gia = gia; }
+    public LocalTime getGioChieu() {
+        return gioChieu;
+    }
 
-    public String getMaPhim() { return maPhim; }
-    public void setMaPhim(String maPhim) { this.maPhim = maPhim; }
+    public void setGioChieu(LocalTime gioChieu) {
+        this.gioChieu = gioChieu;
+    }
 
-    public String getTenPhim() { return tenPhim; }
-    public void setTenPhim(String tenPhim) { this.tenPhim = tenPhim; }
+    public BigDecimal getGia() {
+        return gia;
+    }
 
-    public String getMaPhong() { return maPhong; }
-    public void setMaPhong(String maPhong) { this.maPhong = maPhong; }
+    public void setGia(BigDecimal gia) {
+        this.gia = gia;
+    }
 
-    public String getTenPhong() { return tenPhong; }
-    public void setTenPhong(String tenPhong) { this.tenPhong = tenPhong; }
+    public String getMaPhim() {
+        return maPhim;
+    }
 
-    public String getMaRap() { return maRap; }
-    public void setMaRap(String maRap) { this.maRap = maRap; }
+    public void setMaPhim(String maPhim) {
+        this.maPhim = maPhim;
+    }
 
-    public String getTenRap() { return tenRap; }
-    public void setTenRap(String tenRap) { this.tenRap = tenRap; }
+    public String getTenPhim() {
+        return tenPhim;
+    }
+
+    public void setTenPhim(String tenPhim) {
+        this.tenPhim = tenPhim;
+    }
+
+    public String getPoster() {
+        return poster;
+    }
+
+    public void setPoster(String poster) {
+        this.poster = poster;
+    }
+
+    public String getMaPhong() {
+        return maPhong;
+    }
+
+    public void setMaPhong(String maPhong) {
+        this.maPhong = maPhong;
+    }
+
+    public String getTenPhong() {
+        return tenPhong;
+    }
+
+    public void setTenPhong(String tenPhong) {
+        this.tenPhong = tenPhong;
+    }
+
+    public String getMaRap() {
+        return maRap;
+    }
+
+    public void setMaRap(String maRap) {
+        this.maRap = maRap;
+    }
+
+    public String getTenRap() {
+        return tenRap;
+    }
+
+    public void setTenRap(String tenRap) {
+        this.tenRap = tenRap;
+    }
 }

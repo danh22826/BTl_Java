@@ -8,12 +8,11 @@ import java.util.List;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
 
-    // 🔥 Lấy hóa đơn theo mã khách hàng
-    List<HoaDon> findByMaKhachHang(String maKhachHang);
+    // ✅ Sửa: Bổ sung chữ "KhachHang_" để JPA biết đường chui vào Object KhachHang tìm MaKhachHang
+    List<HoaDon> findByKhachHang_MaKhachHang(String maKhachHang);
 
-    // 🔥 Lọc theo trạng thái
     List<HoaDon> findByTrangThai(HoaDonStatus trangThai);
 
-    // 🔥 Kết hợp
-    List<HoaDon> findByMaKhachHangAndTrangThai(String maKhachHang, HoaDonStatus trangThai);
+    // ✅ Sửa tương tự cho hàm kết hợp nhiều điều kiện
+    List<HoaDon> findByKhachHang_MaKhachHangAndTrangThai(String maKhachHang, HoaDonStatus trangThai);
 }

@@ -13,6 +13,7 @@ public class PhimResponse {
     private LocalDate ngayKhoiChieu;
     private String doTuoiPhuHop;
     private String ngonNgu;
+    private String trailerUrl;
 
     private List<String> theLoais;
 
@@ -83,6 +84,14 @@ public class PhimResponse {
 
     public void setNgonNgu(String ngonNgu) {
         this.ngonNgu = ngonNgu;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
     }
 
     public List<String> getTheLoais() {

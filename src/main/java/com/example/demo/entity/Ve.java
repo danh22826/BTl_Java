@@ -2,7 +2,6 @@ package com.example.demo.entity;
 
 import com.example.demo.constant.VeStatus;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Ve")
@@ -21,33 +20,50 @@ public class Ve {
     private Ghe ghe;
 
     @ManyToOne
-    @JoinColumn(name = "MaDon")
+    @JoinColumn(name = "MaDon", nullable = false)
     private HoaDon hoaDon;
 
-    @Enumerated(EnumType.STRING) // map enum sang string trong DB
+    @Enumerated(EnumType.STRING)
     @Column(name = "TrangThaiVe", nullable = false)
     private VeStatus trangThaiVe;
 
-    @Column(name = "NgayDat")
-    private LocalDateTime ngayDat;
+    public String getMaVe() {
+        return maVe;
+    }
 
-    
-    // getter và setter
-    public String getMaVe() { return maVe; }
-    public void setMaVe(String maVe) { this.maVe = maVe; }
+    public void setMaVe(String maVe) {
+        this.maVe = maVe;
+    }
 
-    public SuatChieu getSuatChieu() { return suatChieu; }
-    public void setSuatChieu(SuatChieu suatChieu) { this.suatChieu = suatChieu; }
+    public SuatChieu getSuatChieu() {
+        return suatChieu;
+    }
 
-    public Ghe getGhe() { return ghe; }
-    public void setGhe(Ghe ghe) { this.ghe = ghe; }
+    public void setSuatChieu(SuatChieu suatChieu) {
+        this.suatChieu = suatChieu;
+    }
 
-    public HoaDon getHoaDon() { return hoaDon; }
-    public void setHoaDon(HoaDon hoaDon) { this.hoaDon = hoaDon; }
+    public Ghe getGhe() {
+        return ghe;
+    }
 
-    public VeStatus getTrangThaiVe() { return trangThaiVe; }
-    public void setTrangThaiVe(VeStatus trangThaiVe) { this.trangThaiVe = trangThaiVe; }
+    public void setGhe(Ghe ghe) {
+        this.ghe = ghe;
+    }
 
-    public LocalDateTime getNgayDat() { return ngayDat; }
-    public void setNgayDat(LocalDateTime ngayDat) { this.ngayDat = ngayDat; }
+    public HoaDon getHoaDon() {
+        return hoaDon;
+    }
+
+    public void setHoaDon(HoaDon hoaDon) {
+        this.hoaDon = hoaDon;
+    }
+
+    public VeStatus getTrangThaiVe() {
+        return trangThaiVe;
+    }
+
+    public void setTrangThaiVe(VeStatus trangThaiVe) {
+        this.trangThaiVe = trangThaiVe;
+    }
 }

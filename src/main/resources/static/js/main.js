@@ -1,118 +1,155 @@
-// ===== AUTHENTICATION MANAGEMENT =====
-function checkAuthStatus() {
-  const isLoggedIn = sessionStorage.getItem('loggedInUser') !== null;
-  const logoutView = document.getElementById('logoutView');
-  const loginView = document.getElementById('loginView');
+﻿let allMovies = [];
+let allGenres = [];
+const PER_PAGE = 15;
+let currentPage = 1;
 
-  if (logoutView && loginView) {
-    if (isLoggedIn) {
-      logoutView.style.display = 'none';
-      loginView.style.display = 'flex';
-    } else {
-      logoutView.style.display = 'flex';
-      loginView.style.display = 'none';
-    }
-  }
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  initPage('phim');
 
-function handleLogout(e) {
-  e.preventDefault();
-  if (confirm('Bạn chắc chắn muốn đăng xuất?')) {
-    sessionStorage.removeItem('loggedInUser');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('isLoggedIn');
-    checkAuthStatus();
-    alert('Đã đăng xuất thành công');
-  }
-}
+  try {
+    [allMovies, allGenres] = await Promise.all([
+      apiFetch('/phim'),
+      apiFetch('/the-loai'),
+    ]);
 
-// Initialize auth status on page load
-document.addEventListener('DOMContentLoaded', function() {
-  checkAuthStatus();
-});
-
-// ===== HERO SLIDER =====
-const heroSlides = [...document.querySelectorAll('.hero-slide')];
-const heroDots = [...document.querySelectorAll('.hero-dot')];
-const prevBtn = document.querySelector('.hero-prev');
-const nextBtn = document.querySelector('.hero-next');
-let heroIndex = 0;
-
-function showHeroSlide(index) {
-  heroIndex = (index + heroSlides.length) % heroSlides.length;
-  heroSlides.forEach((slide, i) => slide.classList.toggle('active', i === heroIndex));
-  heroDots.forEach((dot, i) => dot.classList.toggle('active', i === heroIndex));
-}
-
-prevBtn?.addEventListener('click', () => showHeroSlide(heroIndex - 1));
-nextBtn?.addEventListener('click', () => showHeroSlide(heroIndex + 1));
-heroDots.forEach((dot, i) => dot.addEventListener('click', () => showHeroSlide(i)));
-
-setInterval(() => showHeroSlide(heroIndex + 1), 5000);
-
-document.addEventListener('DOMContentLoaded', function () {
-    // 1. Gọi API lấy danh sách phim
-    fetch('http://localhost:8080/api/phim')
-        .then(response => {
-            if (!response.ok) throw new Error("Không thể kết nối đến server");
-            return response.json();
-        })
-        .then(data => {
-            renderMovies(data);
-        })
-        .catch(error => {
-            console.error('Lỗi:', error);
-            document.querySelectorAll('.loading-text').forEach(el => el.innerText = "Lỗi tải dữ liệu!");
-        });
-});
-
-function renderMovies(movies) {
-    const nowShowingContainer = document.getElementById('now-showing-container');
-    const comingSoonContainer = document.getElementById('coming-soon-container');
-
-    // Xóa dòng "Đang tải..."
-    nowShowingContainer.innerHTML = '';
-    comingSoonContainer.innerHTML = '';
-
-    const today = new Date();
-
-    movies.forEach(movie => {
-        // Phân loại phim dựa trên ngày khởi chiếu
-        const releaseDate = new Date(movie.ngayKhoiChieu);
-
-        // Tạo HTML cho thẻ phim
-        const movieCard = `
-            <article class="movie-card" data-movie-id="${movie.maPhim}">
-                <div class="card-poster">
-                    <div class="card-meta-top">
-                        <span class="badge-status">${releaseDate <= today ? 'Đang chiếu' : 'Sắp chiếu'}</span>
-                        <span class="badge-rating"><i class="fas fa-star"></i> 8.5</span>
-                    </div>
-                    <img src="${movie.poster || 'https://via.placeholder.com/300x450'}" alt="${movie.tenPhim}" />
-                    <div class="button-group">
-                        <a href="../movie/movie-detail.html?id=${movie.maPhim}" class="buy-btn detail-btn">Xem chi tiết</a>
-                        <a href="../gia_ve/giave.html?movie_id=${movie.maPhim}" class="buy-btn">Mua vé ngay</a>
-                    </div>
-                </div>
-                <div class="card-info">
-                    <h3>${movie.tenPhim}</h3>
-                    <div class="meta-line">
-                        <span><i class="far fa-clock"></i> ${movie.thoiLuong} phút</span>
-                        <span>•</span>
-                        <span>${movie.doTuoiPhuHop}</span>
-                    </div>
-                    <div class="genre-tags">
-                        ${movie.theLoais.map(tag => `<span>${tag}</span>`).join('')}
-                    </div>
-                </div>
-            </article>
-        ;
-
-        // Đổ vào đúng khung (Container)
-        if (releaseDate <= today) {
-            nowShowingContainer.innerHTML += movieCard;
-        } else {
-            comingSoonContainer.innerHTML += movieCard;
-        }
+    const genreSelect = document.getElementById('genreFilter');
+    allGenres.forEach((genre) => {
+      const option = document.createElement('option');
+      option.value = genre.tenTheLoai;
+      option.dataset.genreCode = genre.maTheLoai;
+      option.textContent = genre.tenTheLoai;
+      genreSelect.appendChild(option);
     });
+
+    renderMovies();
+  } catch (error) {
+    console.error(error);
+    document.getElementById('movieGrid').innerHTML =
+      '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Không thể tải dữ liệu phim</h3></div>';
+  }
+});
+
+function filterMovies() {
+  currentPage = 1;
+  renderMovies();
+}
+
+function getFiltered() {
+  const keyword = normalizeText(document.getElementById('searchInput').value);
+  const genre = normalizeText(document.getElementById('genreFilter').value);
+
+  return allMovies.filter((movie) => {
+    const movieTitle = normalizeText(movie.tenPhim);
+    const movieGenres = Array.isArray(movie.theLoais)
+      ? movie.theLoais.map((item) => normalizeText(item))
+      : [];
+
+    const matchKeyword = !keyword || movieTitle.includes(keyword);
+    const matchGenre = !genre || movieGenres.includes(genre);
+
+    return matchKeyword && matchGenre;
+  });
+}
+
+function normalizeText(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u0111/g, 'd')
+    .replace(/\u0110/g, 'd')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getPosterUrl(poster) {
+  if (!poster || String(poster).trim() === '') {
+    return 'http://localhost:8080/poster/default.jpg';
+  }
+
+  const cleanPoster = String(poster).trim();
+
+  if (cleanPoster.startsWith('http://') || cleanPoster.startsWith('https://')) {
+    return cleanPoster;
+  }
+
+  if (cleanPoster.startsWith('/')) {
+    return `http://localhost:8080${cleanPoster}`;
+  }
+
+  return `http://localhost:8080/poster/${cleanPoster}`;
+}
+
+function renderMovies() {
+  const filtered = getFiltered();
+  const grid = document.getElementById('movieGrid');
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>Không tìm thấy phim nào</h3></div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const start = (currentPage - 1) * PER_PAGE;
+  const moviesOnPage = filtered.slice(start, start + PER_PAGE);
+  const buildDetailUrl = (movieId) => `chitietphim.html?id=${encodeURIComponent(movieId)}`;
+
+  grid.innerHTML = moviesOnPage.map((movie) => `
+    <div class="movie-card">
+      <div class="movie-card-poster">
+        <img
+          src="${getPosterUrl(movie.poster)}"
+          alt="${escapeHtml(movie.tenPhim)}"
+          loading="lazy"
+          onerror="this.onerror=null;this.src='http://localhost:8080/poster/default.jpg';"
+        >
+        <div class="movie-card-overlay">
+          <a href="${buildDetailUrl(movie.maPhim)}" class="btn btn-primary">XEM CHI TIẾT</a>
+          <a href="${buildDetailUrl(movie.maPhim)}#showtimeSection" class="btn btn-primary">MUA VÉ</a>
+        </div>
+      </div>
+      <div class="movie-card-body">
+        <a href="${buildDetailUrl(movie.maPhim)}" class="movie-card-title-link">
+          <h4>${escapeHtml(movie.tenPhim)}</h4>
+        </a>
+        <div class="card-meta">
+          ${getAgeBadge(movie.doTuoiPhuHop)}
+          <span>${movie.thoiLuong || '?'} phút</span>
+          ${movie.ngayKhoiChieu ? `<span>· ${formatDate(movie.ngayKhoiChieu)}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const paginationElement = document.getElementById('pagination');
+
+  if (totalPages <= 1) {
+    paginationElement.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  for (let page = 1; page <= totalPages; page += 1) {
+    html += `
+      <button
+        class="btn ${page === currentPage ? 'btn-primary' : 'btn-outline'} movie-page-btn"
+        onclick="goPage(${page})"
+      >
+        ${page}
+      </button>
+    `;
+  }
+
+  paginationElement.innerHTML = html;
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderMovies();
+  window.scrollTo({ top: 200, behavior: 'smooth' });
 }

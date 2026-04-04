@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.constant.HoaDonStatus;
+import com.example.demo.converter.HoaDonStatusConverter;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -14,8 +15,9 @@ public class HoaDon {
     @Column(name = "MaDon")
     private String maDon;
 
-    @Column(name = "MaKhachHang")
-    private String maKhachHang;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaKhachHang", nullable = false)
+    private KhachHang khachHang;
 
     @Column(name = "TongTien")
     private BigDecimal tongTien;
@@ -26,7 +28,7 @@ public class HoaDon {
     @Column(name = "ThoiGianThanhToan")
     private LocalDateTime thoiGianThanhToan;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = HoaDonStatusConverter.class)
     @Column(name = "TrangThai")
     private HoaDonStatus trangThai;
 
@@ -44,12 +46,12 @@ public class HoaDon {
         this.maDon = maDon;
     }
 
-    public String getMaKhachHang() {
-        return maKhachHang;
+    public KhachHang getKhachHang() {
+        return khachHang;
     }
 
-    public void setMaKhachHang(String maKhachHang) {
-        this.maKhachHang = maKhachHang;
+    public void setKhachHang(KhachHang khachHang) {
+        this.khachHang = khachHang;
     }
 
     public BigDecimal getTongTien() {

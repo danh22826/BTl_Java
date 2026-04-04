@@ -36,6 +36,9 @@ public class Phim {
     @Column(name = "NgonNgu", length = 50)
     private String ngonNgu;
 
+    @Column(name = "TrailerUrl", length = 1000)
+    private String trailerUrl;
+
     // ===== MANY TO MANY THE LOAI =====
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -118,6 +121,14 @@ public class Phim {
 
     public void setNgonNgu(String ngonNgu) {
         this.ngonNgu = ngonNgu;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
     }
 
     public List<TheLoai> getTheLoais() {

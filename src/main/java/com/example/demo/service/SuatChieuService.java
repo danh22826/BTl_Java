@@ -64,9 +64,9 @@ public class SuatChieuService {
     }
 
     public SuatChieuResponse getById(String id) {
-        SuatChieu sc = suatChieuRepository.findById(id)
+        SuatChieu suatChieu = suatChieuRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu"));
-        return toResponse(sc);
+        return toResponse(suatChieu);
     }
 
     @Transactional
@@ -81,16 +81,16 @@ public class SuatChieuService {
         PhongChieu phong = phongChieuRepository.findById(req.getMaPhong())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng chiếu"));
 
-        SuatChieu sc = new SuatChieu();
-        sc.setMaSuat(req.getMaSuat());
-        sc.setPhim(phim);
-        sc.setPhongChieu(phong);
-        sc.setNgayChieu(req.getNgayChieu());
-        sc.setGioChieu(req.getGioChieu());
-        sc.setGia(req.getGia());
+        SuatChieu suatChieu = new SuatChieu();
+        suatChieu.setMaSuat(req.getMaSuat());
+        suatChieu.setPhim(phim);
+        suatChieu.setPhongChieu(phong);
+        suatChieu.setNgayChieu(req.getNgayChieu());
+        suatChieu.setGioChieu(req.getGioChieu());
+        suatChieu.setGia(req.getGia());
 
         try {
-            return toResponse(suatChieuRepository.save(sc));
+            return toResponse(suatChieuRepository.save(suatChieu));
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Suất chiếu đã tồn tại hoặc vi phạm ràng buộc dữ liệu");
         }
@@ -98,7 +98,7 @@ public class SuatChieuService {
 
     @Transactional
     public SuatChieuResponse update(String id, UpdateSuatChieuRequest req) {
-        SuatChieu sc = suatChieuRepository.findById(id)
+        SuatChieu suatChieu = suatChieuRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu"));
 
         Phim phim = phimRepository.findById(req.getMaPhim())
@@ -107,14 +107,14 @@ public class SuatChieuService {
         PhongChieu phong = phongChieuRepository.findById(req.getMaPhong())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng chiếu"));
 
-        sc.setPhim(phim);
-        sc.setPhongChieu(phong);
-        sc.setNgayChieu(req.getNgayChieu());
-        sc.setGioChieu(req.getGioChieu());
-        sc.setGia(req.getGia());
+        suatChieu.setPhim(phim);
+        suatChieu.setPhongChieu(phong);
+        suatChieu.setNgayChieu(req.getNgayChieu());
+        suatChieu.setGioChieu(req.getGioChieu());
+        suatChieu.setGia(req.getGia());
 
         try {
-            return toResponse(suatChieuRepository.save(sc));
+            return toResponse(suatChieuRepository.save(suatChieu));
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Suất chiếu đã tồn tại hoặc vi phạm ràng buộc dữ liệu");
         }
@@ -128,24 +128,25 @@ public class SuatChieuService {
         suatChieuRepository.deleteById(id);
     }
 
-    private SuatChieuResponse toResponse(SuatChieu sc) {
-        SuatChieuResponse res = new SuatChieuResponse();
+    private SuatChieuResponse toResponse(SuatChieu suatChieu) {
+        SuatChieuResponse response = new SuatChieuResponse();
 
-        res.setMaSuat(sc.getMaSuat());
-        res.setNgayChieu(sc.getNgayChieu());
-        res.setGioChieu(sc.getGioChieu());
-        res.setGia(sc.getGia());
+        response.setMaSuat(suatChieu.getMaSuat());
+        response.setNgayChieu(suatChieu.getNgayChieu());
+        response.setGioChieu(suatChieu.getGioChieu());
+        response.setGia(suatChieu.getGia());
 
-        res.setMaPhim(sc.getPhim().getMaPhim());
-        res.setTenPhim(sc.getPhim().getTenPhim());
+        response.setMaPhim(suatChieu.getPhim().getMaPhim());
+        response.setTenPhim(suatChieu.getPhim().getTenPhim());
+        response.setPoster(suatChieu.getPhim().getPoster());
 
-        res.setMaPhong(sc.getPhongChieu().getMaPhong());
-        res.setTenPhong(sc.getPhongChieu().getTenPhong());
+        response.setMaPhong(suatChieu.getPhongChieu().getMaPhong());
+        response.setTenPhong(suatChieu.getPhongChieu().getTenPhong());
 
-        res.setMaRap(sc.getPhongChieu().getRap().getMaRap());
-        res.setTenRap(sc.getPhongChieu().getRap().getTenRap());
+        response.setMaRap(suatChieu.getPhongChieu().getRap().getMaRap());
+        response.setTenRap(suatChieu.getPhongChieu().getRap().getTenRap());
 
-        return res;
+        return response;
     }
 
     private PhimTheoNgayResponse mapToPhimTheoNgayResponse(Map<String, Object> row) {
@@ -194,7 +195,7 @@ public class SuatChieuService {
         );
 
         response.setSoGheTrong(
-                row.get("SoGheTrong") != null ? ((Number) row.get("SoGheTrong")).intValue() : null
+                row.get("SoGheTrong") != null ? Math.max(((Number) row.get("SoGheTrong")).intValue(), 0) : null
         );
 
         return response;

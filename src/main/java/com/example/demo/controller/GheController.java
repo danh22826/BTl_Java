@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.Ghe.CreateGheRequest;
 import com.example.demo.dto.response.GheResponse;
+import com.example.demo.dto.response.GheTheoSuatResponse;
 import com.example.demo.service.GheService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +20,16 @@ public class GheController {
         this.service = service;
     }
 
-    // Lấy ghế theo phòng
     @GetMapping
     public List<GheResponse> getByPhong(@RequestParam String maPhong) {
         return service.getByPhong(maPhong);
     }
 
-    // Tạo ghế
+    @GetMapping("/theo-suat/{maSuat}")
+    public List<GheTheoSuatResponse> getBySuat(@PathVariable String maSuat) {
+        return service.getBySuat(maSuat);
+    }
+
     @PostMapping
     public GheResponse create(@Valid @RequestBody CreateGheRequest req) {
         return service.create(req);

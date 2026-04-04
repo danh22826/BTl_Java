@@ -46,6 +46,7 @@ public class PhimService {
         p.setNgayKhoiChieu(req.getNgayKhoiChieu());
         p.setDoTuoiPhuHop(req.getDoTuoiPhuHop());
         p.setNgonNgu(req.getNgonNgu());
+        p.setTrailerUrl(req.getTrailerUrl());
 
         if (req.getMaTheLoais() != null) {
             List<TheLoai> list = theLoaiRepo.findByMaTheLoaiIn(req.getMaTheLoais());
@@ -69,6 +70,7 @@ public class PhimService {
         p.setNgayKhoiChieu(req.getNgayKhoiChieu());
         p.setDoTuoiPhuHop(req.getDoTuoiPhuHop());
         p.setNgonNgu(req.getNgonNgu());
+        p.setTrailerUrl(req.getTrailerUrl());
 
         if (req.getMaTheLoais() != null) {
             List<TheLoai> list = theLoaiRepo.findByMaTheLoaiIn(req.getMaTheLoais());
@@ -94,6 +96,7 @@ public class PhimService {
         r.setNgayKhoiChieu(p.getNgayKhoiChieu());
         r.setDoTuoiPhuHop(p.getDoTuoiPhuHop());
         r.setNgonNgu(p.getNgonNgu());
+        r.setTrailerUrl(p.getTrailerUrl());
 
         if (p.getTheLoais() != null) {
             r.setTheLoais(

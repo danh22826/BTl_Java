@@ -44,7 +44,6 @@ public class PhongChieuService {
 
     @Transactional
     public PhongChieuResponse create(CreatePhongChieuRequest request) {
-
         if (phongChieuRepository.existsByRap_MaRapAndTenPhong(
                 request.getMaRap(),
                 request.getTenPhong()
@@ -58,15 +57,15 @@ public class PhongChieuService {
         LoaiPhong loaiPhong = loaiPhongRepository.findById(request.getMaLoaiPhong())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy loại phòng"));
 
-        PhongChieu p = new PhongChieu();
-        p.setMaPhong(request.getMaPhong());
-        p.setTenPhong(request.getTenPhong());
-        p.setSucChua(request.getSucChua());
-        p.setRap(rap);
-        p.setLoaiPhong(loaiPhong);
+        PhongChieu phongChieu = new PhongChieu();
+        phongChieu.setMaPhong(request.getMaPhong());
+        phongChieu.setTenPhong(request.getTenPhong());
+        phongChieu.setSucChua(request.getSucChua());
+        phongChieu.setRap(rap);
+        phongChieu.setLoaiPhong(loaiPhong);
 
         try {
-            return toResponse(phongChieuRepository.save(p));
+            return toResponse(phongChieuRepository.save(phongChieu));
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Phòng chiếu đã tồn tại hoặc vi phạm ràng buộc dữ liệu");
         }
@@ -74,19 +73,23 @@ public class PhongChieuService {
 
     @Transactional
     public PhongChieuResponse update(String maPhong, UpdatePhongChieuRequest request) {
-
-        PhongChieu p = phongChieuRepository.findById(maPhong)
+        PhongChieu phongChieu = phongChieuRepository.findById(maPhong)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng"));
+
+        int soGheHienCo = phongChieu.getGhes() == null ? 0 : phongChieu.getGhes().size();
+        if (request.getSucChua() < soGheHienCo) {
+            throw new ConflictException("Sức chứa không được nhỏ hơn số ghế hiện có trong phòng");
+        }
 
         LoaiPhong loaiPhong = loaiPhongRepository.findById(request.getMaLoaiPhong())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy loại phòng"));
 
-        p.setTenPhong(request.getTenPhong());
-        p.setSucChua(request.getSucChua());
-        p.setLoaiPhong(loaiPhong);
+        phongChieu.setTenPhong(request.getTenPhong());
+        phongChieu.setSucChua(request.getSucChua());
+        phongChieu.setLoaiPhong(loaiPhong);
 
         try {
-            return toResponse(phongChieuRepository.save(p));
+            return toResponse(phongChieuRepository.save(phongChieu));
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Phòng chiếu đã tồn tại hoặc vi phạm ràng buộc dữ liệu");
         }
@@ -100,19 +103,22 @@ public class PhongChieuService {
         phongChieuRepository.deleteById(maPhong);
     }
 
-    private PhongChieuResponse toResponse(PhongChieu p) {
-        PhongChieuResponse res = new PhongChieuResponse();
+    private PhongChieuResponse toResponse(PhongChieu phongChieu) {
+        PhongChieuResponse response = new PhongChieuResponse();
+        int sucChuaThucTe = phongChieu.getGhes() == null || phongChieu.getGhes().isEmpty()
+                ? phongChieu.getSucChua()
+                : phongChieu.getGhes().size();
 
-        res.setMaPhong(p.getMaPhong());
-        res.setTenPhong(p.getTenPhong());
-        res.setSucChua(p.getSucChua());
+        response.setMaPhong(phongChieu.getMaPhong());
+        response.setTenPhong(phongChieu.getTenPhong());
+        response.setSucChua(sucChuaThucTe);
 
-        res.setMaRap(p.getRap().getMaRap());
-        res.setTenRap(p.getRap().getTenRap());
+        response.setMaRap(phongChieu.getRap().getMaRap());
+        response.setTenRap(phongChieu.getRap().getTenRap());
 
-        res.setMaLoaiPhong(p.getLoaiPhong().getMaLoaiPhong());
-        res.setTenLoaiPhong(p.getLoaiPhong().getTenLoaiPhong());
+        response.setMaLoaiPhong(phongChieu.getLoaiPhong().getMaLoaiPhong());
+        response.setTenLoaiPhong(phongChieu.getLoaiPhong().getTenLoaiPhong());
 
-        return res;
+        return response;
     }
 }

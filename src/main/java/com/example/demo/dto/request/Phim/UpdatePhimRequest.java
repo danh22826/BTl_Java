@@ -35,6 +35,9 @@ public class UpdatePhimRequest {
     @Size(max = 50, message = "Ngôn ngữ tối đa 50 ký tự")
     private String ngonNgu;
 
+    @Size(max = 1000, message = "Trailer URL toi da 1000 ky tu")
+    private String trailerUrl;
+
     @NotEmpty(message = "Phim phải thuộc ít nhất 1 thể loại")
     private List<String> maTheLoais;
 
@@ -97,6 +100,14 @@ public class UpdatePhimRequest {
 
     public void setNgonNgu(String ngonNgu) {
         this.ngonNgu = ngonNgu;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
     }
 
     public List<String> getMaTheLoais() {
