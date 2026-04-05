@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/api/the-loai/**",
             "/api/loai-ghe/**",
             "/api/loai-phong/**",
-            "/api/phong-chieu/**"
+            "/api/phong-chieu/**",
+            "/api/do-an/**"
     };
 
     private static final String[] ADMIN_MANAGED_APIS = {
@@ -50,7 +51,8 @@ public class SecurityConfig {
             "/api/the-loai/**",
             "/api/loai-ghe/**",
             "/api/loai-phong/**",
-            "/api/phong-chieu/**"
+            "/api/phong-chieu/**",
+            "/api/do-an/**"
     };
 
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
@@ -80,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_STATIC_RESOURCES).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_READ_APIS).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/hoa-don/**").authenticated()
                         .requestMatchers("/api/ve/**").authenticated()
                         .requestMatchers(HttpMethod.POST, ADMIN_MANAGED_APIS).hasRole("ADMIN")

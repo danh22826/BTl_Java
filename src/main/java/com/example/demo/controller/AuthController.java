@@ -145,14 +145,16 @@ public class AuthController {
         nguoiDung.setRole("ROLE_USER");
         nguoiDungRepository.save(nguoiDung);
 
-        KhachHang khachHang = khachHangRepository.findFirstByTenKhachHang(username)
+        KhachHang khachHang = findCustomerByUsername(username)
                 .orElseGet(() -> {
                     KhachHang customer = new KhachHang();
                     customer.setMaKhachHang(generateCustomerId());
                     customer.setTenKhachHang(username);
+                    customer.setUsername(username);
                     return customer;
                 });
 
+        khachHang.setUsername(username);
         if (!email.isBlank()) {
             khachHang.setEmail(email);
         }
@@ -276,7 +278,7 @@ public class AuthController {
         }
 
         return khachHangRepository.findFirstByEmailIgnoreCase(identifier)
-                .map(KhachHang::getTenKhachHang)
+                .map(khachHang -> defaultIfBlank(khachHang.getUsername(), khachHang.getTenKhachHang()))
                 .flatMap(nguoiDungRepository::findByUsernameIgnoreCase);
     }
 
@@ -301,7 +303,7 @@ public class AuthController {
     }
 
     private String resolveCustomerId(String username) {
-        return khachHangRepository.findFirstByTenKhachHang(username)
+        return findCustomerByUsername(username)
                 .map(KhachHang::getMaKhachHang)
                 .orElseGet(() -> {
                     if ("tester".equalsIgnoreCase(username)) {
@@ -311,6 +313,14 @@ public class AuthController {
                 });
     }
 
+    private Optional<KhachHang> findCustomerByUsername(String username) {
+        return khachHangRepository.findFirstByUsernameIgnoreCase(username)
+                .or(() -> khachHangRepository.findFirstByTenKhachHang(username));
+    }
+
+    private String defaultIfBlank(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
     private String generateCustomerId() {
         for (int i = 0; i < 20; i++) {
             String candidate = "KH" + UUID.randomUUID()
@@ -343,3 +353,5 @@ public class AuthController {
         return value == null ? "" : value.trim();
     }
 }
+
+

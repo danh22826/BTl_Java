@@ -12,6 +12,9 @@ public class HoaDonDetailResponse {
     private String maDon;
     private String maKhachHang;
     private BigDecimal tongTien;
+    private BigDecimal tongTienVe;
+    private BigDecimal tongTienDoAn;
+    private BigDecimal tongTienThanhToan;
     private LocalDateTime thoiGianDat;
     private LocalDateTime thoiGianThanhToan;
     private LocalDateTime hanThanhToan;
@@ -37,6 +40,7 @@ public class HoaDonDetailResponse {
     private Integer soVe;
     private boolean coTheThanhToan;
     private List<HoaDonVeResponse> dsVe = new ArrayList<>();
+    private List<HoaDonDoAnResponse> dsDoAn = new ArrayList<>();
 
     public String getMaDon() {
         return maDon;
@@ -60,6 +64,30 @@ public class HoaDonDetailResponse {
 
     public void setTongTien(BigDecimal tongTien) {
         this.tongTien = tongTien;
+    }
+
+    public BigDecimal getTongTienVe() {
+        return tongTienVe;
+    }
+
+    public void setTongTienVe(BigDecimal tongTienVe) {
+        this.tongTienVe = tongTienVe;
+    }
+
+    public BigDecimal getTongTienDoAn() {
+        return tongTienDoAn;
+    }
+
+    public void setTongTienDoAn(BigDecimal tongTienDoAn) {
+        this.tongTienDoAn = tongTienDoAn;
+    }
+
+    public BigDecimal getTongTienThanhToan() {
+        return tongTienThanhToan;
+    }
+
+    public void setTongTienThanhToan(BigDecimal tongTienThanhToan) {
+        this.tongTienThanhToan = tongTienThanhToan;
     }
 
     public LocalDateTime getThoiGianDat() {
@@ -220,5 +248,13 @@ public class HoaDonDetailResponse {
 
     public void setDsVe(List<HoaDonVeResponse> dsVe) {
         this.dsVe = dsVe;
+    }
+
+    public List<HoaDonDoAnResponse> getDsDoAn() {
+        return dsDoAn;
+    }
+
+    public void setDsDoAn(List<HoaDonDoAnResponse> dsDoAn) {
+        this.dsDoAn = dsDoAn;
     }
 }

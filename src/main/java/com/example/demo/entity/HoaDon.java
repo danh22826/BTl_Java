@@ -2,7 +2,14 @@ package com.example.demo.entity;
 
 import com.example.demo.constant.HoaDonStatus;
 import com.example.demo.converter.HoaDonStatusConverter;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +28,15 @@ public class HoaDon {
 
     @Column(name = "TongTien")
     private BigDecimal tongTien;
+
+    @Column(name = "TongTienVe")
+    private BigDecimal tongTienVe;
+
+    @Column(name = "TongTienDoAn")
+    private BigDecimal tongTienDoAn;
+
+    @Column(name = "TongTienThanhToan")
+    private BigDecimal tongTienThanhToan;
 
     @Column(name = "ThoiGianDat")
     private LocalDateTime thoiGianDat;
@@ -60,6 +76,30 @@ public class HoaDon {
 
     public void setTongTien(BigDecimal tongTien) {
         this.tongTien = tongTien;
+    }
+
+    public BigDecimal getTongTienVe() {
+        return tongTienVe;
+    }
+
+    public void setTongTienVe(BigDecimal tongTienVe) {
+        this.tongTienVe = tongTienVe;
+    }
+
+    public BigDecimal getTongTienDoAn() {
+        return tongTienDoAn;
+    }
+
+    public void setTongTienDoAn(BigDecimal tongTienDoAn) {
+        this.tongTienDoAn = tongTienDoAn;
+    }
+
+    public BigDecimal getTongTienThanhToan() {
+        return tongTienThanhToan;
+    }
+
+    public void setTongTienThanhToan(BigDecimal tongTienThanhToan) {
+        this.tongTienThanhToan = tongTienThanhToan;
     }
 
     public LocalDateTime getThoiGianDat() {

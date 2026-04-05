@@ -3,8 +3,12 @@ package com.example.demo.service;
 import com.example.demo.constant.HoaDonStatus;
 import com.example.demo.constant.VeStatus;
 import com.example.demo.dto.request.HoaDon.CreateHoaDonRequest;
+import com.example.demo.dto.request.HoaDon.HoaDonDoAnRequest;
 import com.example.demo.dto.response.HoaDonDetailResponse;
+import com.example.demo.dto.response.HoaDonDoAnResponse;
 import com.example.demo.dto.response.HoaDonVeResponse;
+import com.example.demo.entity.ChiTietDoAn;
+import com.example.demo.entity.DoAn;
 import com.example.demo.entity.Ghe;
 import com.example.demo.entity.HoaDon;
 import com.example.demo.entity.KhachHang;
@@ -13,6 +17,8 @@ import com.example.demo.entity.Ve;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ConflictException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.repository.ChiTietDoAnRepository;
+import com.example.demo.repository.DoAnRepository;
 import com.example.demo.repository.GheRepository;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.repository.KhachHangRepository;
@@ -30,8 +36,10 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +48,7 @@ public class HoaDonService {
 
     private static final int HOLD_MINUTES = 10;
     private static final int CANCELLATION_LOCK_HOURS = 3;
+    private static final String FOOD_ACTIVE_STATUS = "DANG_BAN";
     private static final EnumSet<VeStatus> ACTIVE_VE_STATUSES = EnumSet.of(VeStatus.DA_DAT, VeStatus.DA_THANH_TOAN);
 
     private final HoaDonRepository hoaDonRepository;
@@ -47,17 +56,23 @@ public class HoaDonService {
     private final SuatChieuRepository suatChieuRepository;
     private final GheRepository gheRepository;
     private final VeRepository veRepository;
+    private final DoAnRepository doAnRepository;
+    private final ChiTietDoAnRepository chiTietDoAnRepository;
 
     public HoaDonService(HoaDonRepository hoaDonRepository,
                          KhachHangRepository khachHangRepository,
                          SuatChieuRepository suatChieuRepository,
                          GheRepository gheRepository,
-                         VeRepository veRepository) {
+                         VeRepository veRepository,
+                         DoAnRepository doAnRepository,
+                         ChiTietDoAnRepository chiTietDoAnRepository) {
         this.hoaDonRepository = hoaDonRepository;
         this.khachHangRepository = khachHangRepository;
         this.suatChieuRepository = suatChieuRepository;
         this.gheRepository = gheRepository;
         this.veRepository = veRepository;
+        this.doAnRepository = doAnRepository;
+        this.chiTietDoAnRepository = chiTietDoAnRepository;
     }
 
     @Transactional
@@ -65,23 +80,24 @@ public class HoaDonService {
         String maSuat = normalize(request.getMaSuat());
         String maKhachHang = normalize(request.getMaKhachHang());
         Set<String> dsGhe = sanitizeSeatIds(request.getDsGhe());
+        List<FoodSelection> dsDoAn = sanitizeFoodItems(request.getDsDoAn());
 
         if (maKhachHang.isBlank()) {
-            throw new BadRequestException("Mã khách hàng không được để trống");
+            throw new BadRequestException("Ma khach hang khong duoc de trong");
         }
 
         if (!khachHangRepository.existsById(maKhachHang)) {
-            throw new BadRequestException("Không tìm thấy khách hàng tương ứng với mã đăng nhập hiện tại");
+            throw new BadRequestException("Khong tim thay khach hang tuong ung voi ma dang nhap hien tai");
         }
 
         if (dsGhe.size() > 8) {
-            throw new BadRequestException("Tối đa 8 ghế cho mỗi hóa đơn");
+            throw new BadRequestException("Toi da 8 ghe cho moi hoa don");
         }
 
         releaseExpiredPendingInvoices(maSuat);
 
         SuatChieu suatChieu = suatChieuRepository.findById(maSuat)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu"));
+                .orElseThrow(() -> new NotFoundException("Khong tim thay suat chieu"));
 
         List<Ghe> ghes = gheRepository.findAllById(dsGhe)
                 .stream()
@@ -89,7 +105,7 @@ public class HoaDonService {
                 .toList();
 
         if (ghes.size() != dsGhe.size()) {
-            throw new BadRequestException("Có ghế không tồn tại trong hệ thống");
+            throw new BadRequestException("Co ghe khong ton tai trong he thong");
         }
 
         String maPhong = suatChieu.getPhongChieu().getMaPhong();
@@ -98,7 +114,7 @@ public class HoaDonService {
                 .map(Ghe::getMaGhe)
                 .toList();
         if (!gheSaiPhong.isEmpty()) {
-            throw new ConflictException("Ghế không thuộc phòng của suất chiếu: " + String.join(", ", gheSaiPhong));
+            throw new ConflictException("Ghe khong thuoc phong cua suat chieu: " + String.join(", ", gheSaiPhong));
         }
 
         List<Ve> veDaCo = veRepository.findBySuatChieu_MaSuatAndGhe_MaGheInAndTrangThaiVeIn(maSuat, dsGhe, ACTIVE_VE_STATUSES)
@@ -111,7 +127,7 @@ public class HoaDonService {
                     .map(ve -> ve.getGhe().getTenGhe())
                     .sorted()
                     .collect(Collectors.joining(", "));
-            throw new ConflictException("Ghế đã được giữ hoặc thanh toán: " + dsGheDaDat);
+            throw new ConflictException("Ghe da duoc giu hoac thanh toan: " + dsGheDaDat);
         }
 
         long tongGhePhong = gheRepository.countByPhongChieu_MaPhong(maPhong);
@@ -121,20 +137,26 @@ public class HoaDonService {
                 .count();
 
         if (soVeDangHoatDong + dsGhe.size() > tongGhePhong) {
-            throw new ConflictException("Số vé của suất chiếu vượt sức chứa phòng");
+            throw new ConflictException("So ve cua suat chieu vuot suc chua phong");
         }
+
+        Map<String, DoAn> doAnMap = loadFoodMap(dsDoAn);
+        BigDecimal tongTienVe = calculateTicketTotal(suatChieu, ghes);
+        BigDecimal tongTienDoAn = calculateFoodTotal(dsDoAn, doAnMap);
+        BigDecimal tongTien = tongTienVe.add(tongTienDoAn);
 
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaDon(generateId("HD", hoaDonRepository::existsById));
 
-        // Cập nhật ánh xạ sang KhachHang Entity
         KhachHang khachHangEntity = khachHangRepository.findById(maKhachHang)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
+                .orElseThrow(() -> new NotFoundException("Khong tim thay khach hang"));
         hoaDon.setKhachHang(khachHangEntity);
-
         hoaDon.setThoiGianDat(LocalDateTime.now());
         hoaDon.setTrangThai(HoaDonStatus.CHUA_THANH_TOAN);
-        hoaDon.setTongTien(calculateTotal(suatChieu, ghes));
+        hoaDon.setTongTienVe(tongTienVe);
+        hoaDon.setTongTienDoAn(tongTienDoAn);
+        hoaDon.setTongTien(tongTien);
+        hoaDon.setTongTienThanhToan(tongTien);
 
         HoaDon savedHoaDon = hoaDonRepository.save(hoaDon);
 
@@ -155,20 +177,24 @@ public class HoaDonService {
             dsVe.add(ve);
         }
 
-        // Bắt lỗi Race Condition (Xung đột khi 2 người đặt cùng 1 ghế ở cùng 1 thời điểm)
         try {
             veRepository.saveAll(dsVe);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Rất tiếc, ghế bạn chọn vừa có người nhanh tay đặt mất rồi! Vui lòng tải lại trang và chọn ghế khác.");
+            throw new ConflictException("Rat tiec, ghe ban chon vua co nguoi nhanh tay dat mat roi. Vui long tai lai trang va chon ghe khac.");
         }
 
-        return toDetail(savedHoaDon, dsVe);
+        List<ChiTietDoAn> dsChiTietDoAn = createFoodLines(savedHoaDon, dsDoAn, doAnMap);
+        if (!dsChiTietDoAn.isEmpty()) {
+            chiTietDoAnRepository.saveAll(dsChiTietDoAn);
+        }
+
+        return toDetail(savedHoaDon, dsVe, dsChiTietDoAn);
     }
 
     @Transactional
     public HoaDonDetailResponse getDetail(String maDon) {
         HoaDon hoaDon = hoaDonRepository.findById(maDon)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy hóa đơn"));
+                .orElseThrow(() -> new NotFoundException("Khong tim thay hoa don"));
 
         expireIfNeeded(hoaDon);
         List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
@@ -202,18 +228,21 @@ public class HoaDonService {
     @Transactional
     public HoaDonDetailResponse pay(String maDon, String phuongThucThanhToan) {
         HoaDon hoaDon = hoaDonRepository.findById(maDon)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy hóa đơn"));
+                .orElseThrow(() -> new NotFoundException("Khong tim thay hoa don"));
 
         expireIfNeeded(hoaDon);
 
         if (hoaDon.getTrangThai() == HoaDonStatus.DA_HUY) {
-            throw new ConflictException("Hóa đơn đã bị hủy");
+            throw new ConflictException("Hoa don da bi huy");
         }
 
         if (hoaDon.getTrangThai() == HoaDonStatus.DA_THANH_TOAN) {
             return getDetail(maDon);
         }
 
+        if (hoaDon.getTongTienThanhToan() == null) {
+            hoaDon.setTongTienThanhToan(defaultIfNull(hoaDon.getTongTien()));
+        }
         hoaDon.setTrangThai(HoaDonStatus.DA_THANH_TOAN);
         hoaDon.setThoiGianThanhToan(LocalDateTime.now());
         hoaDon.setPhuongThucThanhToan(normalize(phuongThucThanhToan));
@@ -231,10 +260,10 @@ public class HoaDonService {
     @Transactional
     public HoaDonDetailResponse cancel(String maDon) {
         HoaDon hoaDon = hoaDonRepository.findById(maDon)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy hóa đơn"));
+                .orElseThrow(() -> new NotFoundException("Khong tim thay hoa don"));
 
         if (hoaDon.getTrangThai() == HoaDonStatus.DA_THANH_TOAN) {
-            throw new ConflictException("Không thể hủy hóa đơn đã thanh toán");
+            throw new ConflictException("Khong the huy hoa don da thanh toan");
         }
 
         List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
@@ -330,11 +359,36 @@ public class HoaDonService {
                 && ve.getHoaDon().getThoiGianDat().plusMinutes(HOLD_MINUTES).isAfter(LocalDateTime.now());
     }
 
-    private BigDecimal calculateTotal(SuatChieu suatChieu, Collection<Ghe> ghes) {
+    private BigDecimal calculateTicketTotal(SuatChieu suatChieu, Collection<Ghe> ghes) {
         BigDecimal basePrice = getTicketBasePrice(suatChieu);
         return ghes.stream()
                 .map(ghe -> basePrice.add(getTicketSurcharge(ghe)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateFoodTotal(List<FoodSelection> dsDoAn, Map<String, DoAn> doAnMap) {
+        return dsDoAn.stream()
+                .map(item -> getFoodPrice(doAnMap.get(item.getMaDoAn())).multiply(BigDecimal.valueOf(item.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<ChiTietDoAn> createFoodLines(HoaDon hoaDon, List<FoodSelection> dsDoAn, Map<String, DoAn> doAnMap) {
+        List<ChiTietDoAn> results = new ArrayList<>();
+        for (FoodSelection item : dsDoAn) {
+            DoAn doAn = doAnMap.get(item.getMaDoAn());
+            BigDecimal donGia = getFoodPrice(doAn);
+
+            ChiTietDoAn chiTiet = new ChiTietDoAn();
+            chiTiet.setMaChiTietDoAn(generateId("CTD", chiTietDoAnRepository::existsById));
+            chiTiet.setHoaDon(hoaDon);
+            chiTiet.setDoAn(doAn);
+            chiTiet.setSoLuong(item.getSoLuong());
+            chiTiet.setDonGia(donGia);
+            chiTiet.setThanhTien(donGia.multiply(BigDecimal.valueOf(item.getSoLuong())));
+            chiTiet.setGhiChu(item.getGhiChu());
+            results.add(chiTiet);
+        }
+        return results;
     }
 
     private void cancelTickets(List<Ve> dsVe) {
@@ -373,14 +427,65 @@ public class HoaDonService {
         return ghe.getLoaiGhe().getGiaPhuThu() == null ? BigDecimal.ZERO : ghe.getLoaiGhe().getGiaPhuThu();
     }
 
+    private BigDecimal getFoodPrice(DoAn doAn) {
+        return doAn == null || doAn.getDonGia() == null ? BigDecimal.ZERO : doAn.getDonGia();
+    }
+
+    private Map<String, DoAn> loadFoodMap(List<FoodSelection> dsDoAn) {
+        if (dsDoAn.isEmpty()) {
+            return Map.of();
+        }
+
+        Set<String> maDoAns = dsDoAn.stream()
+                .map(FoodSelection::getMaDoAn)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Map<String, DoAn> doAnMap = doAnRepository.findAllById(maDoAns)
+                .stream()
+                .collect(Collectors.toMap(DoAn::getMaDoAn, doAn -> doAn));
+
+        if (doAnMap.size() != maDoAns.size()) {
+            List<String> missingIds = maDoAns.stream()
+                    .filter(maDoAn -> !doAnMap.containsKey(maDoAn))
+                    .toList();
+            throw new BadRequestException("Co do an khong ton tai trong he thong: " + String.join(", ", missingIds));
+        }
+
+        List<String> unavailableFoods = doAnMap.values().stream()
+                .filter(doAn -> !isFoodActive(doAn))
+                .map(DoAn::getTenDoAn)
+                .toList();
+        if (!unavailableFoods.isEmpty()) {
+            throw new ConflictException("Co mon an tam thoi khong con phuc vu: " + String.join(", ", unavailableFoods));
+        }
+
+        return doAnMap;
+    }
+
+    private boolean isFoodActive(DoAn doAn) {
+        String status = normalize(doAn.getTrangThai()).toUpperCase();
+        return status.isBlank() || FOOD_ACTIVE_STATUS.equals(status);
+    }
+
     private HoaDonDetailResponse toDetail(HoaDon hoaDon, List<Ve> dsVe) {
+        List<ChiTietDoAn> dsDoAn = chiTietDoAnRepository.findByHoaDon_MaDon(hoaDon.getMaDon());
+        return toDetail(hoaDon, dsVe, dsDoAn);
+    }
+
+    private HoaDonDetailResponse toDetail(HoaDon hoaDon, List<Ve> dsVe, List<ChiTietDoAn> dsDoAn) {
         HoaDonDetailResponse response = new HoaDonDetailResponse();
         response.setMaDon(hoaDon.getMaDon());
-
-        // Lấy mã khách hàng thông qua Entity
         response.setMaKhachHang(hoaDon.getKhachHang().getMaKhachHang());
 
-        response.setTongTien(hoaDon.getTongTien());
+        BigDecimal tongTienVe = hoaDon.getTongTienVe() == null ? calculateTicketAmountFromTickets(dsVe) : hoaDon.getTongTienVe();
+        BigDecimal tongTienDoAn = hoaDon.getTongTienDoAn() == null ? calculateFoodAmountFromLines(dsDoAn) : hoaDon.getTongTienDoAn();
+        BigDecimal tongTien = hoaDon.getTongTien() == null ? tongTienVe.add(tongTienDoAn) : hoaDon.getTongTien();
+        BigDecimal tongTienThanhToan = hoaDon.getTongTienThanhToan() == null ? tongTien : hoaDon.getTongTienThanhToan();
+
+        response.setTongTien(tongTien);
+        response.setTongTienVe(tongTienVe);
+        response.setTongTienDoAn(tongTienDoAn);
+        response.setTongTienThanhToan(tongTienThanhToan);
         response.setThoiGianDat(hoaDon.getThoiGianDat());
         response.setThoiGianThanhToan(hoaDon.getThoiGianThanhToan());
         response.setHanThanhToan(hoaDon.getThoiGianDat() == null ? null : hoaDon.getThoiGianDat().plusMinutes(HOLD_MINUTES));
@@ -409,6 +514,7 @@ public class HoaDonService {
         }
 
         response.setDsVe(dsVe.stream().map(this::toTicketResponse).toList());
+        response.setDsDoAn(dsDoAn.stream().map(this::toFoodResponse).toList());
         return response;
     }
 
@@ -429,9 +535,39 @@ public class HoaDonService {
         return response;
     }
 
+    private HoaDonDoAnResponse toFoodResponse(ChiTietDoAn chiTietDoAn) {
+        HoaDonDoAnResponse response = new HoaDonDoAnResponse();
+        response.setMaChiTietDoAn(chiTietDoAn.getMaChiTietDoAn());
+        response.setMaDoAn(chiTietDoAn.getDoAn().getMaDoAn());
+        response.setTenDoAn(chiTietDoAn.getDoAn().getTenDoAn());
+        response.setLoaiDoAn(chiTietDoAn.getDoAn().getLoaiDoAn());
+        response.setSoLuong(chiTietDoAn.getSoLuong());
+        response.setDonGia(chiTietDoAn.getDonGia());
+        response.setThanhTien(chiTietDoAn.getThanhTien());
+        response.setHinhAnh(chiTietDoAn.getDoAn().getHinhAnh());
+        response.setGhiChu(chiTietDoAn.getGhiChu());
+        return response;
+    }
+
+    private BigDecimal calculateTicketAmountFromTickets(List<Ve> dsVe) {
+        return dsVe.stream()
+                .map(ve -> ve.getThanhTien() == null
+                        ? defaultIfNull(ve.getGiaVeCoBan()).add(defaultIfNull(ve.getPhuThu()))
+                        : ve.getThanhTien())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateFoodAmountFromLines(List<ChiTietDoAn> dsDoAn) {
+        return dsDoAn.stream()
+                .map(chiTietDoAn -> chiTietDoAn.getThanhTien() == null
+                        ? defaultIfNull(chiTietDoAn.getDonGia()).multiply(BigDecimal.valueOf(chiTietDoAn.getSoLuong() == null ? 0 : chiTietDoAn.getSoLuong()))
+                        : chiTietDoAn.getThanhTien())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private Set<String> sanitizeSeatIds(List<String> dsGhe) {
         if (dsGhe == null || dsGhe.isEmpty()) {
-            throw new BadRequestException("Danh sách ghế không được để trống");
+            throw new BadRequestException("Danh sach ghe khong duoc de trong");
         }
 
         return dsGhe.stream()
@@ -440,11 +576,39 @@ public class HoaDonService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    private List<FoodSelection> sanitizeFoodItems(List<HoaDonDoAnRequest> dsDoAn) {
+        if (dsDoAn == null || dsDoAn.isEmpty()) {
+            return List.of();
+        }
+
+        List<FoodSelection> results = new ArrayList<>();
+        for (HoaDonDoAnRequest item : dsDoAn) {
+            String maDoAn = normalize(item.getMaDoAn());
+            if (maDoAn.isBlank()) {
+                throw new BadRequestException("Ma do an khong duoc de trong");
+            }
+            if (item.getSoLuong() == null || item.getSoLuong() <= 0) {
+                throw new BadRequestException("So luong do an phai >= 1");
+            }
+            results.add(new FoodSelection(maDoAn, item.getSoLuong(), normalizeNullable(item.getGhiChu())));
+        }
+        return results;
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
 
-    private String generateId(String prefix, java.util.function.Predicate<String> exists) {
+    private String normalizeNullable(String value) {
+        String normalized = normalize(value);
+        return normalized.isBlank() ? null : normalized;
+    }
+
+    private BigDecimal defaultIfNull(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private String generateId(String prefix, Predicate<String> exists) {
         for (int i = 0; i < 20; i++) {
             String id = prefix + UUID.randomUUID().toString()
                     .replace("-", "")
@@ -454,6 +618,30 @@ public class HoaDonService {
                 return id;
             }
         }
-        throw new ConflictException("Không thể tạo mã mới, vui lòng thử lại");
+        throw new ConflictException("Khong the tao ma moi, vui long thu lai");
+    }
+
+    private static final class FoodSelection {
+        private final String maDoAn;
+        private final Integer soLuong;
+        private final String ghiChu;
+
+        private FoodSelection(String maDoAn, Integer soLuong, String ghiChu) {
+            this.maDoAn = maDoAn;
+            this.soLuong = soLuong;
+            this.ghiChu = ghiChu;
+        }
+
+        public String getMaDoAn() {
+            return maDoAn;
+        }
+
+        public Integer getSoLuong() {
+            return soLuong;
+        }
+
+        public String getGhiChu() {
+            return ghiChu;
+        }
     }
 }
