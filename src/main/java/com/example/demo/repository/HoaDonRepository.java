@@ -11,6 +11,8 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
     // ✅ Sửa: Bổ sung chữ "KhachHang_" để JPA biết đường chui vào Object KhachHang tìm MaKhachHang
     List<HoaDon> findByKhachHang_MaKhachHang(String maKhachHang);
 
+    List<HoaDon> findByKhachHang_MaKhachHangOrderByThoiGianDatDesc(String maKhachHang);
+
     List<HoaDon> findByTrangThai(HoaDonStatus trangThai);
 
     // ✅ Sửa tương tự cho hàm kết hợp nhiều điều kiện

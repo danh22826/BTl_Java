@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 public class HoaDonService {
 
     private static final int HOLD_MINUTES = 10;
+    private static final int CANCELLATION_LOCK_HOURS = 3;
     private static final EnumSet<VeStatus> ACTIVE_VE_STATUSES = EnumSet.of(VeStatus.DA_DAT, VeStatus.DA_THANH_TOAN);
 
     private final HoaDonRepository hoaDonRepository;
@@ -139,12 +140,18 @@ public class HoaDonService {
 
         List<Ve> dsVe = new ArrayList<>();
         for (Ghe ghe : ghes) {
+            BigDecimal giaVeCoBan = getTicketBasePrice(suatChieu);
+            BigDecimal phuThu = getTicketSurcharge(ghe);
+
             Ve ve = new Ve();
             ve.setMaVe(generateId("VE", veRepository::existsById));
             ve.setHoaDon(savedHoaDon);
             ve.setSuatChieu(suatChieu);
             ve.setGhe(ghe);
             ve.setTrangThaiVe(VeStatus.DA_DAT);
+            ve.setGiaVeCoBan(giaVeCoBan);
+            ve.setPhuThu(phuThu);
+            ve.setThanhTien(giaVeCoBan.add(phuThu));
             dsVe.add(ve);
         }
 
@@ -166,6 +173,30 @@ public class HoaDonService {
         expireIfNeeded(hoaDon);
         List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
         return toDetail(hoaDon, dsVe);
+    }
+
+    @Transactional
+    public List<HoaDonDetailResponse> getByCustomer(String maKhachHang) {
+        String customerId = normalize(maKhachHang);
+
+        if (customerId.isBlank()) {
+            throw new BadRequestException("Ma khach hang khong duoc de trong");
+        }
+
+        if (!khachHangRepository.existsById(customerId)) {
+            throw new NotFoundException("Khong tim thay khach hang");
+        }
+
+        List<HoaDon> dsHoaDon = hoaDonRepository.findByKhachHang_MaKhachHangOrderByThoiGianDatDesc(customerId);
+        List<HoaDonDetailResponse> results = new ArrayList<>();
+
+        for (HoaDon hoaDon : dsHoaDon) {
+            expireIfNeeded(hoaDon);
+            List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(hoaDon.getMaDon());
+            results.add(toDetail(hoaDon, dsVe));
+        }
+
+        return results;
     }
 
     @Transactional
@@ -207,9 +238,39 @@ public class HoaDonService {
         }
 
         List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
+        if (isCancellationClosed(dsVe)) {
+            throw new ConflictException("Khong the huy giu cho khi con duoi 3 gio truoc suat chieu hoac suat chieu da bat dau");
+        }
         hoaDon.setTrangThai(HoaDonStatus.DA_HUY);
         hoaDonRepository.save(hoaDon);
-        veRepository.deleteByHoaDon_MaDon(maDon);
+        cancelTickets(dsVe);
+        veRepository.saveAll(dsVe);
+
+        return toDetail(hoaDon, dsVe);
+    }
+
+    @Transactional
+    public HoaDonDetailResponse cancelPaidInvoice(String maDon) {
+        HoaDon hoaDon = hoaDonRepository.findById(maDon)
+                .orElseThrow(() -> new NotFoundException("Khong tim thay hoa don"));
+
+        if (hoaDon.getTrangThai() == HoaDonStatus.DA_HUY) {
+            return getDetail(maDon);
+        }
+
+        if (hoaDon.getTrangThai() != HoaDonStatus.DA_THANH_TOAN) {
+            throw new ConflictException("Chi hoa don da thanh toan moi co the huy ve");
+        }
+
+        List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
+        if (isCancellationClosed(dsVe)) {
+            throw new ConflictException("Khong the huy ve khi con duoi 3 gio truoc suat chieu hoac suat chieu da bat dau");
+        }
+
+        hoaDon.setTrangThai(HoaDonStatus.DA_HUY);
+        hoaDonRepository.save(hoaDon);
+        cancelTickets(dsVe);
+        veRepository.saveAll(dsVe);
 
         return toDetail(hoaDon, dsVe);
     }
@@ -232,7 +293,9 @@ public class HoaDonService {
             }
             hoaDon.setTrangThai(HoaDonStatus.DA_HUY);
             hoaDonRepository.save(hoaDon);
-            veRepository.deleteByHoaDon_MaDon(maDon);
+            List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(maDon);
+            cancelTickets(dsVe);
+            veRepository.saveAll(dsVe);
         }
     }
 
@@ -248,7 +311,9 @@ public class HoaDonService {
 
         hoaDon.setTrangThai(HoaDonStatus.DA_HUY);
         hoaDonRepository.save(hoaDon);
-        veRepository.deleteByHoaDon_MaDon(hoaDon.getMaDon());
+        List<Ve> dsVe = veRepository.findByHoaDon_MaDonOrderByGhe_SoHangAscGhe_SoCotAsc(hoaDon.getMaDon());
+        cancelTickets(dsVe);
+        veRepository.saveAll(dsVe);
     }
 
     private boolean isTicketActive(Ve ve) {
@@ -266,10 +331,46 @@ public class HoaDonService {
     }
 
     private BigDecimal calculateTotal(SuatChieu suatChieu, Collection<Ghe> ghes) {
-        BigDecimal basePrice = suatChieu.getGia() == null ? BigDecimal.ZERO : suatChieu.getGia();
+        BigDecimal basePrice = getTicketBasePrice(suatChieu);
         return ghes.stream()
-                .map(ghe -> basePrice.add(ghe.getLoaiGhe().getGiaPhuThu() == null ? BigDecimal.ZERO : ghe.getLoaiGhe().getGiaPhuThu()))
+                .map(ghe -> basePrice.add(getTicketSurcharge(ghe)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void cancelTickets(List<Ve> dsVe) {
+        for (Ve ve : dsVe) {
+            ve.setTrangThaiVe(VeStatus.DA_HUY);
+        }
+    }
+
+    private boolean isCancellationClosed(List<Ve> dsVe) {
+        LocalDateTime showtimeStart = getShowtimeStart(dsVe);
+        if (showtimeStart == null) {
+            return false;
+        }
+
+        return !showtimeStart.minusHours(CANCELLATION_LOCK_HOURS).isAfter(LocalDateTime.now());
+    }
+
+    private LocalDateTime getShowtimeStart(List<Ve> dsVe) {
+        if (dsVe == null || dsVe.isEmpty()) {
+            return null;
+        }
+
+        SuatChieu suatChieu = dsVe.get(0).getSuatChieu();
+        if (suatChieu == null || suatChieu.getNgayChieu() == null || suatChieu.getGioChieu() == null) {
+            return null;
+        }
+
+        return LocalDateTime.of(suatChieu.getNgayChieu(), suatChieu.getGioChieu());
+    }
+
+    private BigDecimal getTicketBasePrice(SuatChieu suatChieu) {
+        return suatChieu.getGia() == null ? BigDecimal.ZERO : suatChieu.getGia();
+    }
+
+    private BigDecimal getTicketSurcharge(Ghe ghe) {
+        return ghe.getLoaiGhe().getGiaPhuThu() == null ? BigDecimal.ZERO : ghe.getLoaiGhe().getGiaPhuThu();
     }
 
     private HoaDonDetailResponse toDetail(HoaDon hoaDon, List<Ve> dsVe) {
@@ -296,7 +397,7 @@ public class HoaDonService {
             response.setMaSuat(suatChieu.getMaSuat());
             response.setNgayChieu(suatChieu.getNgayChieu());
             response.setGioChieu(suatChieu.getGioChieu());
-            response.setGiaVeCoBan(suatChieu.getGia());
+            response.setGiaVeCoBan(veDauTien.getGiaVeCoBan() == null ? getTicketBasePrice(suatChieu) : veDauTien.getGiaVeCoBan());
             response.setMaPhim(suatChieu.getPhim().getMaPhim());
             response.setTenPhim(suatChieu.getPhim().getTenPhim());
             response.setPoster(suatChieu.getPhim().getPoster());
@@ -313,8 +414,9 @@ public class HoaDonService {
 
     private HoaDonVeResponse toTicketResponse(Ve ve) {
         HoaDonVeResponse response = new HoaDonVeResponse();
-        BigDecimal giaVeCoBan = ve.getSuatChieu().getGia() == null ? BigDecimal.ZERO : ve.getSuatChieu().getGia();
-        BigDecimal phuThu = ve.getGhe().getLoaiGhe().getGiaPhuThu() == null ? BigDecimal.ZERO : ve.getGhe().getLoaiGhe().getGiaPhuThu();
+        BigDecimal giaVeCoBan = ve.getGiaVeCoBan() == null ? getTicketBasePrice(ve.getSuatChieu()) : ve.getGiaVeCoBan();
+        BigDecimal phuThu = ve.getPhuThu() == null ? getTicketSurcharge(ve.getGhe()) : ve.getPhuThu();
+        BigDecimal thanhTien = ve.getThanhTien() == null ? giaVeCoBan.add(phuThu) : ve.getThanhTien();
 
         response.setMaVe(ve.getMaVe());
         response.setMaGhe(ve.getGhe().getMaGhe());
@@ -322,7 +424,7 @@ public class HoaDonService {
         response.setTenLoaiGhe(ve.getGhe().getLoaiGhe().getTenLoaiGhe());
         response.setGiaVeCoBan(giaVeCoBan);
         response.setPhuThu(phuThu);
-        response.setThanhTien(giaVeCoBan.add(phuThu));
+        response.setThanhTien(thanhTien);
         response.setTrangThaiVe(ve.getTrangThaiVe().name());
         return response;
     }

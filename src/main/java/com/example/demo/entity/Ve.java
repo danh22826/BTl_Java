@@ -3,6 +3,8 @@ package com.example.demo.entity;
 import com.example.demo.constant.VeStatus;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "Ve")
 public class Ve {
@@ -26,6 +28,15 @@ public class Ve {
     @Enumerated(EnumType.STRING)
     @Column(name = "TrangThaiVe", nullable = false)
     private VeStatus trangThaiVe;
+
+    @Column(name = "GiaVeCoBan")
+    private BigDecimal giaVeCoBan;
+
+    @Column(name = "PhuThu")
+    private BigDecimal phuThu;
+
+    @Column(name = "ThanhTien")
+    private BigDecimal thanhTien;
 
     public String getMaVe() {
         return maVe;
@@ -65,5 +76,29 @@ public class Ve {
 
     public void setTrangThaiVe(VeStatus trangThaiVe) {
         this.trangThaiVe = trangThaiVe;
+    }
+
+    public BigDecimal getGiaVeCoBan() {
+        return giaVeCoBan;
+    }
+
+    public void setGiaVeCoBan(BigDecimal giaVeCoBan) {
+        this.giaVeCoBan = giaVeCoBan;
+    }
+
+    public BigDecimal getPhuThu() {
+        return phuThu;
+    }
+
+    public void setPhuThu(BigDecimal phuThu) {
+        this.phuThu = phuThu;
+    }
+
+    public BigDecimal getThanhTien() {
+        return thanhTien;
+    }
+
+    public void setThanhTien(BigDecimal thanhTien) {
+        this.thanhTien = thanhTien;
     }
 }

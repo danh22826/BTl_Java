@@ -16,6 +16,9 @@ public class KhachHang {
     @Column(name = "TenKhachHang", nullable = false)
     private String tenKhachHang;
 
+    @Column(name = "Email")
+    private String email;
+
     public String getMaKhachHang() {
         return maKhachHang;
     }
@@ -30,5 +33,13 @@ public class KhachHang {
 
     public void setTenKhachHang(String tenKhachHang) {
         this.tenKhachHang = tenKhachHang;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

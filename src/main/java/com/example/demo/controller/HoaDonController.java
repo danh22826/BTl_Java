@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/hoa-don")
 @CrossOrigin(origins = "*")
@@ -30,6 +32,11 @@ public class HoaDonController {
         return hoaDonService.getDetail(maDon);
     }
 
+    @GetMapping("/khach-hang/{maKhachHang}")
+    public List<HoaDonDetailResponse> getByCustomer(@PathVariable String maKhachHang) {
+        return hoaDonService.getByCustomer(maKhachHang);
+    }
+
     @PostMapping("/{maDon}/thanh-toan")
     public HoaDonDetailResponse pay(@PathVariable String maDon,
                                     @Valid @RequestBody ThanhToanHoaDonRequest request) {
@@ -39,5 +46,10 @@ public class HoaDonController {
     @PostMapping("/{maDon}/huy")
     public HoaDonDetailResponse cancel(@PathVariable String maDon) {
         return hoaDonService.cancel(maDon);
+    }
+
+    @PostMapping("/{maDon}/huy-ve")
+    public HoaDonDetailResponse cancelPaidInvoice(@PathVariable String maDon) {
+        return hoaDonService.cancelPaidInvoice(maDon);
     }
 }

@@ -10,4 +10,8 @@ import java.util.Optional;
 public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long> {
     // Hàm này giúp Spring Security tìm tài khoản trong DB khi người dùng gõ chữ đăng nhập
     Optional<NguoiDung> findByUsername(String username);
+
+    Optional<NguoiDung> findByUsernameIgnoreCase(String username);
+
+    boolean existsByUsername(String username);
 }
